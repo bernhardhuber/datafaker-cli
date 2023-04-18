@@ -29,6 +29,7 @@ import org.huberb.datafaker.cli.FakerAdapter.Locales;
 import org.reflections.Reflections;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 /**
  *
@@ -45,19 +46,39 @@ public class DatafakerCli implements Callable<Integer> {
 
     @Option(names = {"-l", "--locale"},
             required = false,
-            description = "language-tag informat {language}_{country}")
+            description = "language-tag informat {language}_{country}.")
     private String languageTag;
     @Option(names = {"-c", "--count"},
             required = false,
             defaultValue = "3",
-            description = "count of results")
+            description = "count of results.")
     private int countOfResults;
 
-    @Option(names = {"--available-locales"}, description = "shows available locales")
+    @Option(names = {"--expression"},
+            required = false,
+            description = "TODO describe me.")
+    private boolean expressionOption;
+    @Option(names = {"--csv"},
+            required = false,
+            description = "TODO describe me.")
+    private boolean csvExpressionOption;
+    @Option(names = {"--json"},
+            required = false,
+            description = "TODO describe me.")
+    private boolean jsonExpressionOption;
+    @Option(names = {"--jsona"},
+            required = false,
+            description = "TODO describe me.")
+    private boolean jsonArrayExpressionOption;
+
+    @Parameters(index = "0..*", description = "expression arguments.")
+    private List<String> expressions;
+
+    @Option(names = {"--available-locales"}, description = "shows available locales.")
     boolean availableLocales;
-    @Option(names = {"--available-providers"}, description = "shows available providers")
+    @Option(names = {"--available-providers"}, description = "shows available providers.")
     boolean availableProviders;
-    @Option(names = {"--available-provider-methods"}, description = "shows available provider methods")
+    @Option(names = {"--available-provider-methods"}, description = "shows available provider methods.")
     boolean availableProviderMethods;
 
     public static void main(String[] args) {
@@ -94,7 +115,11 @@ public class DatafakerCli implements Callable<Integer> {
                 languageTag = Locales.defaultLocale().get().toLanguageTag();
             }
             Faker faker = FakerAdapter.createFakerFromLocale(languageTag);
+
             String expression = "fullName: #{Name.fullName}, fullAddress: #{Address.fullAddress}";
+            if (expressionOption && !expressions.isEmpty()) {
+                expression = expressions.get(0);
+            }
             System_out_format("expression: %s%n", expression);
             if (countOfResults < 0) {
                 countOfResults = 1;
@@ -107,16 +132,49 @@ public class DatafakerCli implements Callable<Integer> {
         return 0;
     }
 
+    void actions(Faker faker) {
+        {
+            String singleExpression = "#{Name.fullName} #{Address.fullAddress}";
+            String resultExpression = faker.expression(singleExpression);
+        }
+        {
+            String columnExpressions1_n = "fullName";
+            String columnExpressions1_v = "#{Name.fullName}";
+            String columnExpressions2_n = "fullAddress";
+            String columnExpressions2_v = "#{Address.fullAddress}";
+            // mod 2: column-name, value
+            String resultCsv = faker.csv(countOfResults,
+                    columnExpressions1_n, columnExpressions1_v,
+                    columnExpressions2_n, columnExpressions2_v);
+        }
+        {
+            String fieldExpressions1_n = "fullName";
+            String fieldExpressions1_v = "#{Name.fullName}";
+            String fieldExpressions2_n = "fullAddress";
+            String fieldExpressions2_v = "#{Address.fullAddress}";
+            // mod 2: field-name, value
+            String resultJson = faker.json(
+                    fieldExpressions1_n, fieldExpressions1_v,
+                    fieldExpressions2_n, fieldExpressions2_v
+            );
+            // json array mod 3: length, name, value
+            String resultJsona = faker.jsona(
+                    "3", fieldExpressions1_n, fieldExpressions1_v,
+                    "3", fieldExpressions2_n, fieldExpressions2_v
+            );
+        }
+    }
+
+    void System_out_format(String format, Object... args) {
+        System.out.format(format, args);
+    }
+
     List<Class> findAllClassesExtendingAbstractProvider(String... packageNames) {
         final List<Class> result = new Reflections(packageNames).getSubTypesOf(AbstractProvider.class)
                 .stream()
                 .sorted((cl1, cl2) -> cl1.getName().compareTo(cl2.getName()))
                 .collect(Collectors.toList());
         return result;
-    }
-
-    void System_out_format(String format, Object... args) {
-        System.out.format(format, args);
     }
 
     List<Method> findAllMathodsClassesExtendingAbstractProvider(String... packageNames) {
