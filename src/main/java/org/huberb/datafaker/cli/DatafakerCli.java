@@ -98,26 +98,27 @@ public class DatafakerCli implements Callable<Integer> {
                         return l1.toLanguageTag().compareTo(l2.toLanguageTag());
                     }).
                     forEach(l -> System_out_format("locale : %s%n", l.toLanguageTag()));
-        }
-        if (availableProviders) {
+        } else if (availableProviders) {
             findAllClassesExtendingAbstractProvider("net.datafaker.providers.base")
                     .forEach(cl -> System_out_format("%s : %s%n", cl.getName(), cl.getSimpleName()));
-        }
-        if (availableProviderMethods) {
+        } else if (availableProviderMethods) {
             findAllMathodsClassesExtendingAbstractProvider("net.datafaker.providers.base")
-                    .forEach(l -> System_out_format("%s%n", l));
-        }
-
-        if (!availableLocales
-                && !availableProviders
-                && !availableProviderMethods) {
+                    .stream()
+                    .collect(Collectors.groupingBy(m -> m.getDeclaringClass().getName()))
+                    .forEach((String k, List<Method> v) -> {
+                        System_out_format("%nClass: %s%n", k);
+                        v.forEach(elem -> System_out_format("%s.%s%n", elem.getDeclaringClass().getSimpleName(), elem.getName()));
+                    });
+//            findAllMathodsClassesExtendingAbstractProvider("net.datafaker.providers.base")
+//                    .forEach(l -> System_out_format("%s%n", l));
+        } else {
             if (languageTag == null) {
                 languageTag = Locales.defaultLocale().get().toLanguageTag();
             }
             Faker faker = FakerAdapter.createFakerFromLocale(languageTag);
 
             String expression = "fullName: #{Name.fullName}, fullAddress: #{Address.fullAddress}";
-            if (expressionOption && !expressions.isEmpty()) {
+            if (expressionOption && expressions != null && !expressions.isEmpty()) {
                 expression = expressions.get(0);
             }
             System_out_format("expression: %s%n", expression);
