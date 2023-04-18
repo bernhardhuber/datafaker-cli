@@ -1,2 +1,4 @@
 # datafaker-cli
- commandline interface for datafaker
+
+Provide a commandline interface for datafaker
+
