@@ -90,12 +90,6 @@ public class DatafakerCli implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         System_out_format("Hello %s%n", this.getClass().getName());
-        String[] providerPackages = new String[]{"net.datafaker.providers.base",
-            "net.datafaker.providers.entertainment",
-            "net.datafaker.providers.food",
-            "net.datafaker.providers.sport",
-            "net.datafaker.providers.videogame"
-        };
 
         if (availableLocales) {
             System_out_format("default locale: %s%n", Locales.defaultLocale().get().toLanguageTag());
@@ -106,21 +100,23 @@ public class DatafakerCli implements Callable<Integer> {
                     }).
                     forEach(l -> System_out_format("locale : %s%n", l.toLanguageTag()));
         } else if (availableProviders) {
-            new ProvidersQueries().
-                    findAllClassesExtendingAbstractProvider(providerPackages)
-                    .forEach(cl -> System_out_format("%s : %s%n", cl.getName(), cl.getSimpleName()));
+            new ProvidersQueries()
+                    .findAllClassesExtendingAbstractProvider()
+                    .forEach(clazz -> System_out_format("%s : %s%n", clazz.getName(), clazz.getSimpleName()));
         } else if (availableProviderMethods) {
             int mode = 1;
             if (mode == 0) {
-                new ProvidersQueries().findAllMathodsClassesExtendingAbstractProvider(providerPackages)
-                        .forEach(l -> System_out_format("%s%n", l));
+                new ProvidersQueries()
+                        .findAllMathodsClassesExtendingAbstractProvider()
+                        .forEach(method -> System_out_format("%s%n", method));
             } else if (mode == 1) {
-                new ProvidersQueries().findAllMathodsClassesExtendingAbstractProvider(providerPackages)
+                new ProvidersQueries()
+                        .findAllMathodsClassesExtendingAbstractProvider()
                         .stream()
                         .collect(Collectors.groupingBy(m -> m.getDeclaringClass().getName()))
                         .forEach((String k, List<Method> v) -> {
                             System_out_format("%nClass: %s%n", k);
-                            v.forEach(elem -> System_out_format("%s.%s%n", elem.getDeclaringClass().getSimpleName(), elem.getName()));
+                            v.forEach(method -> System_out_format("%s.%s%n", method.getDeclaringClass().getSimpleName(), method));
                         });
             }
         } else {
@@ -149,7 +145,15 @@ public class DatafakerCli implements Callable<Integer> {
 
     static class ProvidersQueries {
 
-        List<Class> findAllClassesExtendingAbstractProvider(String... packageNames) {
+        final String[] defaultProviderPackages = new String[]{"net.datafaker.providers.base",
+            "net.datafaker.providers.entertainment",
+            "net.datafaker.providers.food",
+            "net.datafaker.providers.sport",
+            "net.datafaker.providers.videogame"
+        };
+
+        List<Class> findAllClassesExtendingAbstractProvider() {
+            String[] packageNames = defaultProviderPackages;
             final List<Class> result = new Reflections(packageNames).getSubTypesOf(AbstractProvider.class)
                     .stream()
                     .sorted((cl1, cl2) -> cl1.getName().compareTo(cl2.getName()))
@@ -157,7 +161,8 @@ public class DatafakerCli implements Callable<Integer> {
             return result;
         }
 
-        List<Method> findAllMathodsClassesExtendingAbstractProvider(String... packageNames) {
+        List<Method> findAllMathodsClassesExtendingAbstractProvider() {
+            String[] packageNames = defaultProviderPackages;
             final Set<String> ignoreMethods = new HashSet<>() {
                 {
                     add("getFaker");
