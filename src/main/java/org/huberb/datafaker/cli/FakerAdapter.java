@@ -51,10 +51,6 @@ public class FakerAdapter {
         return faker.csv(limit, columnExpressions);
     }
 
-    static class Providers {
-
-    }
-
     static class Locales {
 
         public static Supplier<List<Locale>> availableLocales() {
