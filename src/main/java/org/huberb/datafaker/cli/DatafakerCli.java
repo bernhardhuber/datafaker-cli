@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -89,6 +90,12 @@ public class DatafakerCli implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         System_out_format("Hello %s%n", this.getClass().getName());
+        String[] providerPackages = new String[]{"net.datafaker.providers.base",
+            "net.datafaker.providers.entertainment",
+            "net.datafaker.providers.food",
+            "net.datafaker.providers.sport",
+            "net.datafaker.providers.videogame"
+        };
 
         if (availableLocales) {
             System_out_format("default locale: %s%n", Locales.defaultLocale().get().toLanguageTag());
@@ -99,23 +106,26 @@ public class DatafakerCli implements Callable<Integer> {
                     }).
                     forEach(l -> System_out_format("locale : %s%n", l.toLanguageTag()));
         } else if (availableProviders) {
-            findAllClassesExtendingAbstractProvider("net.datafaker.providers.base")
+            new ProvidersQueries().
+                    findAllClassesExtendingAbstractProvider(providerPackages)
                     .forEach(cl -> System_out_format("%s : %s%n", cl.getName(), cl.getSimpleName()));
         } else if (availableProviderMethods) {
-            findAllMathodsClassesExtendingAbstractProvider("net.datafaker.providers.base")
-                    .stream()
-                    .collect(Collectors.groupingBy(m -> m.getDeclaringClass().getName()))
-                    .forEach((String k, List<Method> v) -> {
-                        System_out_format("%nClass: %s%n", k);
-                        v.forEach(elem -> System_out_format("%s.%s%n", elem.getDeclaringClass().getSimpleName(), elem.getName()));
-                    });
-//            findAllMathodsClassesExtendingAbstractProvider("net.datafaker.providers.base")
-//                    .forEach(l -> System_out_format("%s%n", l));
-        } else {
-            if (languageTag == null) {
-                languageTag = Locales.defaultLocale().get().toLanguageTag();
+            int mode = 1;
+            if (mode == 0) {
+                new ProvidersQueries().findAllMathodsClassesExtendingAbstractProvider(providerPackages)
+                        .forEach(l -> System_out_format("%s%n", l));
+            } else if (mode == 1) {
+                new ProvidersQueries().findAllMathodsClassesExtendingAbstractProvider(providerPackages)
+                        .stream()
+                        .collect(Collectors.groupingBy(m -> m.getDeclaringClass().getName()))
+                        .forEach((String k, List<Method> v) -> {
+                            System_out_format("%nClass: %s%n", k);
+                            v.forEach(elem -> System_out_format("%s.%s%n", elem.getDeclaringClass().getSimpleName(), elem.getName()));
+                        });
             }
-            Faker faker = FakerAdapter.createFakerFromLocale(languageTag);
+        } else {
+            final String theLanguageTag = Optional.ofNullable(this.languageTag).orElse(Locales.defaultLocale().get().toLanguageTag());
+            Faker faker = FakerAdapter.createFakerFromLocale(theLanguageTag);
 
             String expression = "fullName: #{Name.fullName}, fullAddress: #{Address.fullAddress}";
             if (expressionOption && expressions != null && !expressions.isEmpty()) {
@@ -133,72 +143,42 @@ public class DatafakerCli implements Callable<Integer> {
         return 0;
     }
 
-    void actions(Faker faker) {
-        {
-            String singleExpression = "#{Name.fullName} #{Address.fullAddress}";
-            String resultExpression = faker.expression(singleExpression);
-        }
-        {
-            String columnExpressions1_n = "fullName";
-            String columnExpressions1_v = "#{Name.fullName}";
-            String columnExpressions2_n = "fullAddress";
-            String columnExpressions2_v = "#{Address.fullAddress}";
-            // mod 2: column-name, value
-            String resultCsv = faker.csv(countOfResults,
-                    columnExpressions1_n, columnExpressions1_v,
-                    columnExpressions2_n, columnExpressions2_v);
-        }
-        {
-            String fieldExpressions1_n = "fullName";
-            String fieldExpressions1_v = "#{Name.fullName}";
-            String fieldExpressions2_n = "fullAddress";
-            String fieldExpressions2_v = "#{Address.fullAddress}";
-            // mod 2: field-name, value
-            String resultJson = faker.json(
-                    fieldExpressions1_n, fieldExpressions1_v,
-                    fieldExpressions2_n, fieldExpressions2_v
-            );
-            // json array mod 3: length, name, value
-            String resultJsona = faker.jsona(
-                    "3", fieldExpressions1_n, fieldExpressions1_v,
-                    "3", fieldExpressions2_n, fieldExpressions2_v
-            );
-        }
-    }
-
     void System_out_format(String format, Object... args) {
         System.out.format(format, args);
     }
 
-    List<Class> findAllClassesExtendingAbstractProvider(String... packageNames) {
-        final List<Class> result = new Reflections(packageNames).getSubTypesOf(AbstractProvider.class)
-                .stream()
-                .sorted((cl1, cl2) -> cl1.getName().compareTo(cl2.getName()))
-                .collect(Collectors.toList());
-        return result;
-    }
+    static class ProvidersQueries {
 
-    List<Method> findAllMathodsClassesExtendingAbstractProvider(String... packageNames) {
-        final Set<String> ignoreMethods = new HashSet<>() {
-            {
-                add("getFaker");
-                add("getClass");
-                add("equals");
-                add("hashCode");
-                add("toString");
-                add("wait");
-                add("notify");
-                add("notifyAll");
-            }
-        };
-        final List<Method> result4 = new Reflections(packageNames)
-                .getSubTypesOf(AbstractProvider.class)
-                .stream()
-                .sorted((cl1, cl2) -> cl1.getName().compareTo(cl2.getName()))
-                .flatMap(cl -> Arrays.asList(cl.getMethods()).stream())
-                .filter(m -> !ignoreMethods.contains(m.getName()))
-                .collect(Collectors.toList());
-        return result4;
+        List<Class> findAllClassesExtendingAbstractProvider(String... packageNames) {
+            final List<Class> result = new Reflections(packageNames).getSubTypesOf(AbstractProvider.class)
+                    .stream()
+                    .sorted((cl1, cl2) -> cl1.getName().compareTo(cl2.getName()))
+                    .collect(Collectors.toList());
+            return result;
+        }
 
+        List<Method> findAllMathodsClassesExtendingAbstractProvider(String... packageNames) {
+            final Set<String> ignoreMethods = new HashSet<>() {
+                {
+                    add("getFaker");
+                    add("getClass");
+                    add("equals");
+                    add("hashCode");
+                    add("toString");
+                    add("wait");
+                    add("notify");
+                    add("notifyAll");
+                }
+            };
+            final List<Method> result4 = new Reflections(packageNames)
+                    .getSubTypesOf(AbstractProvider.class)
+                    .stream()
+                    .sorted((cl1, cl2) -> cl1.getName().compareTo(cl2.getName()))
+                    .flatMap(cl -> Arrays.asList(cl.getMethods()).stream())
+                    .filter(m -> !ignoreMethods.contains(m.getName()))
+                    .collect(Collectors.toList());
+            return result4;
+
+        }
     }
 }
