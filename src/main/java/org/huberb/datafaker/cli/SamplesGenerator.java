@@ -22,9 +22,9 @@ import net.datafaker.Faker;
  * @author berni3
  */
 class SamplesGenerator {
-    
+
     String sampleExpression(Faker faker) {
-        String singleExpression = "#{Name.fullName} #{Address.fullAddress}";
+        String singleExpression = "#{Name.fullName}; #{Address.fullAddress}";
         String resultExpression = faker.expression(singleExpression);
         return resultExpression;
     }
@@ -35,7 +35,23 @@ class SamplesGenerator {
         String columnExpressions2_n = "fullAddress";
         String columnExpressions2_v = "#{Address.fullAddress}";
         // mod 2: column-name, value
-        String resultCsv = faker.csv(limit, columnExpressions1_n, columnExpressions1_v, columnExpressions2_n, columnExpressions2_v);
+        String resultCsv = faker.csv(
+                limit,
+                columnExpressions1_n, columnExpressions1_v,
+                columnExpressions2_n, columnExpressions2_v);
+        return resultCsv;
+    }
+
+    String sampleCsv(Faker faker, int limit, String separator, char quote, boolean withHeader) {
+        String columnExpressions1_n = "fullName";
+        String columnExpressions1_v = "#{Name.fullName}";
+        String columnExpressions2_n = "fullAddress";
+        String columnExpressions2_v = "#{Address.fullAddress}";
+        // mod 2: column-name, value
+        String resultCsv = faker.csv(separator, quote, withHeader,
+                limit,
+                columnExpressions1_n, columnExpressions1_v,
+                columnExpressions2_n, columnExpressions2_v);
         return resultCsv;
     }
 
@@ -45,7 +61,9 @@ class SamplesGenerator {
         String fieldExpressions2_n = "fullAddress";
         String fieldExpressions2_v = "#{Address.fullAddress}";
         // mod 2: field-name, value
-        String resultJson = faker.json(fieldExpressions1_n, fieldExpressions1_v, fieldExpressions2_n, fieldExpressions2_v);
+        String resultJson = faker.json(
+                fieldExpressions1_n, fieldExpressions1_v,
+                fieldExpressions2_n, fieldExpressions2_v);
         return resultJson;
     }
 
@@ -56,8 +74,10 @@ class SamplesGenerator {
         String fieldExpressions2_n = "fullAddress";
         String fieldExpressions2_v = "#{Address.fullAddress}";
         // json array mod 3: length, name, value
-        String resultJsona = faker.jsona(limitAsString, fieldExpressions1_n, fieldExpressions1_v, limitAsString, fieldExpressions2_n, fieldExpressions2_v);
+        String resultJsona = faker.jsona(
+                limitAsString, fieldExpressions1_n, fieldExpressions1_v,
+                limitAsString, fieldExpressions2_n, fieldExpressions2_v);
         return resultJsona;
     }
-    
+
 }

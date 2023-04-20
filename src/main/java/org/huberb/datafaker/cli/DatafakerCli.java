@@ -26,7 +26,8 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import net.datafaker.Faker;
 import net.datafaker.providers.base.AbstractProvider;
-import org.huberb.datafaker.cli.FakerAdapter.Locales;
+import org.huberb.datafaker.cli.Adapters.FakerFactory;
+import org.huberb.datafaker.cli.Adapters.Locales;
 import org.reflections.Reflections;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
@@ -121,7 +122,7 @@ public class DatafakerCli implements Callable<Integer> {
             }
         } else {
             final String theLanguageTag = Optional.ofNullable(this.languageTag).orElse(Locales.defaultLocale().get().toLanguageTag());
-            Faker faker = FakerAdapter.createFakerFromLocale(theLanguageTag);
+            Faker faker = FakerFactory.createFakerFromLocale(theLanguageTag);
 
             String expression = "fullName: #{Name.fullName}, fullAddress: #{Address.fullAddress}";
             if (expressionOption && expressions != null && !expressions.isEmpty()) {
@@ -143,6 +144,10 @@ public class DatafakerCli implements Callable<Integer> {
         System.out.format(format, args);
     }
 
+    /**
+     * Query for classes, or methods extending {@link AbstractProvider}.
+     *
+     */
     static class ProvidersQueries {
 
         final String[] defaultProviderPackages = new String[]{"net.datafaker.providers.base",
