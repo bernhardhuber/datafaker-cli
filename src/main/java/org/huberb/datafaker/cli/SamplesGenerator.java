@@ -16,6 +16,10 @@
 package org.huberb.datafaker.cli;
 
 import net.datafaker.Faker;
+import net.datafaker.transformations.CsvTransformer;
+import static net.datafaker.transformations.Field.field;
+import net.datafaker.transformations.JsonTransformer;
+import net.datafaker.transformations.Schema;
 
 /**
  *
@@ -30,41 +34,36 @@ class SamplesGenerator {
     }
 
     String sampleCsv(Faker faker, int limit) {
-        String columnExpressions1_n = "fullName";
-        String columnExpressions1_v = "#{Name.fullName}";
-        String columnExpressions2_n = "fullAddress";
-        String columnExpressions2_v = "#{Address.fullAddress}";
-        // mod 2: column-name, value
-        String resultCsv = faker.csv(
-                limit,
-                columnExpressions1_n, columnExpressions1_v,
-                columnExpressions2_n, columnExpressions2_v);
+        Schema<String, String> schema = Schema.of(
+                field("fullName", () -> faker.name().fullName()),
+                field("fullAddress", () -> faker.address().fullAddress()));
+        CsvTransformer<String> transformer = CsvTransformer.<String>builder().header(true).separator(",").build();
+        String resultCsv = transformer.generate(schema, limit);
         return resultCsv;
     }
 
-    String sampleCsv(Faker faker, int limit, String separator, char quote, boolean withHeader) {
-        String columnExpressions1_n = "fullName";
-        String columnExpressions1_v = "#{Name.fullName}";
-        String columnExpressions2_n = "fullAddress";
-        String columnExpressions2_v = "#{Address.fullAddress}";
-        // mod 2: column-name, value
-        String resultCsv = faker.csv(separator, quote, withHeader,
-                limit,
-                columnExpressions1_n, columnExpressions1_v,
-                columnExpressions2_n, columnExpressions2_v);
-        return resultCsv;
-    }
-
-    String sampleJson(Faker faker) {
-        String fieldExpressions1_n = "fullName";
-        String fieldExpressions1_v = "#{Name.fullName}";
-        String fieldExpressions2_n = "fullAddress";
-        String fieldExpressions2_v = "#{Address.fullAddress}";
-        // mod 2: field-name, value
-        String resultJson = faker.json(
-                fieldExpressions1_n, fieldExpressions1_v,
-                fieldExpressions2_n, fieldExpressions2_v);
-        return resultJson;
+    String sampleJson(Faker faker, int limit) {
+        int mode = 0;
+        if (mode == 0) {
+            Schema<String, String> schema = Schema.of(
+                    field("fullName", () -> faker.name().fullName()),
+                    field("fullAddress", () -> faker.address().fullAddress()));
+            JsonTransformer<String> transformer = JsonTransformer.<String>builder().build();
+            String resultJson = transformer.generate(schema, limit);
+            return resultJson;
+        } else if (mode == 1) {
+            String fieldExpressions1_n = "fullName";
+            String fieldExpressions1_v = faker.name().fullName();
+            String fieldExpressions2_n = "fullAddress";
+            String fieldExpressions2_v = faker.address().fullAddress();
+            // mod 2: field-name, value
+            String resultJson = faker.json(
+                    fieldExpressions1_n, fieldExpressions1_v,
+                    fieldExpressions2_n, fieldExpressions2_v);
+            return resultJson;
+        } else {
+            return "";
+        }
     }
 
     String sampleJsona(Faker faker, int limit) {

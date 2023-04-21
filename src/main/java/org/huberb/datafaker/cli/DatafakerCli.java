@@ -76,12 +76,17 @@ public class DatafakerCli implements Callable<Integer> {
     @Parameters(index = "0..*", description = "expression arguments.")
     private List<String> expressions;
 
-    @Option(names = {"--available-locales"}, description = "shows available locales.")
-    boolean availableLocales;
-    @Option(names = {"--available-providers"}, description = "shows available providers.")
-    boolean availableProviders;
-    @Option(names = {"--available-provider-methods"}, description = "shows available provider methods.")
-    boolean availableProviderMethods;
+    enum AvailableModes {
+        locales, providers, methods1, methods2
+    }
+    @Option(names = {"--available"}, description = "Valid values: ${COMPLETION-CANDIDATES}")
+    AvailableModes availableModes;
+
+    enum SampleModes {
+        expression, csv, json, jsona, providers
+    }
+    @Option(names = {"--samples"}, description = "Valid values: ${COMPLETION-CANDIDATES}")
+    SampleModes sampleModes;
 
     public static void main(String[] args) {
         final int exitCode = new CommandLine(new DatafakerCli()).execute(args);
@@ -91,47 +96,21 @@ public class DatafakerCli implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         System_out_format("Hello %s%n", this.getClass().getName());
+        if (countOfResults < 0) {
+            countOfResults = 1;
+        }
 
-        if (availableLocales) {
-            System_out_format("default locale: %s%n", Locales.defaultLocale().get().toLanguageTag());
-            Locales.availableLocales().get().
-                    stream()
-                    .sorted((Locale l1, Locale l2) -> {
-                        return l1.toLanguageTag().compareTo(l2.toLanguageTag());
-                    }).
-                    forEach(l -> System_out_format("locale : %s%n", l.toLanguageTag()));
-        } else if (availableProviders) {
-            new ProvidersQueries()
-                    .findAllClassesExtendingAbstractProvider()
-                    .forEach(clazz -> System_out_format("%s : %s%n", clazz.getName(), clazz.getSimpleName()));
-        } else if (availableProviderMethods) {
-            int mode = 1;
-            if (mode == 0) {
-                new ProvidersQueries()
-                        .findAllMathodsClassesExtendingAbstractProvider()
-                        .forEach(method -> System_out_format("%s%n", method));
-            } else if (mode == 1) {
-                new ProvidersQueries()
-                        .findAllMathodsClassesExtendingAbstractProvider()
-                        .stream()
-                        .collect(Collectors.groupingBy(m -> m.getDeclaringClass().getName()))
-                        .forEach((String k, List<Method> v) -> {
-                            System_out_format("%nClass: %s%n", k);
-                            v.forEach(method -> System_out_format("%s.%s%n", method.getDeclaringClass().getSimpleName(), method));
-                        });
-            }
+        if (availableModes != null) {
+            handleAvaileModes(availableModes);
+        } else if (sampleModes != null) {
+            handleSampleModes(sampleModes);
         } else {
-            final String theLanguageTag = Optional.ofNullable(this.languageTag).orElse(Locales.defaultLocale().get().toLanguageTag());
-            Faker faker = FakerFactory.createFakerFromLocale(theLanguageTag);
-
             String expression = "fullName: #{Name.fullName}, fullAddress: #{Address.fullAddress}";
             if (expressionOption && expressions != null && !expressions.isEmpty()) {
                 expression = expressions.get(0);
             }
             System_out_format("expression: %s%n", expression);
-            if (countOfResults < 0) {
-                countOfResults = 1;
-            }
+            Faker faker = createTheFaker();
             for (int i = 0; i < countOfResults; i++) {
                 String result = faker.expression(expression);
                 System_out_format("%d result: %s%n", i, result);
@@ -140,8 +119,66 @@ public class DatafakerCli implements Callable<Integer> {
         return 0;
     }
 
-    void System_out_format(String format, Object... args) {
+    Faker createTheFaker() {
+        final String theLanguageTag = Optional.ofNullable(this.languageTag).orElse(Locales.defaultLocale().get().toLanguageTag());
+        Faker faker = FakerFactory.createFakerFromLocale(theLanguageTag);
+        return faker;
+    }
+
+    private void System_out_format(String format, Object... args) {
         System.out.format(format, args);
+    }
+
+    private void handleAvaileModes(AvailableModes availableModes) {
+        if (availableModes == AvailableModes.locales) {
+            System_out_format("default locale: %s%n", Locales.defaultLocale().get().toLanguageTag());
+            Locales.availableLocales().get().
+                    stream()
+                    .sorted((Locale l1, Locale l2) -> {
+                        return l1.toLanguageTag().compareTo(l2.toLanguageTag());
+                    }).
+                    forEach(l -> System_out_format("locale : %s%n", l.toLanguageTag()));
+        } else if (availableModes == AvailableModes.providers) {
+            new ProvidersQueries()
+                    .findAllClassesExtendingAbstractProvider()
+                    .forEach(clazz -> System_out_format("%s : %s%n", clazz.getName(), clazz.getSimpleName()));
+        } else if (availableModes == AvailableModes.methods1) {
+            new ProvidersQueries()
+                    .findAllMathodsClassesExtendingAbstractProvider()
+                    .forEach(method -> System_out_format("%s%n", method));
+        } else if (availableModes == AvailableModes.methods2) {
+            new ProvidersQueries()
+                    .findAllMathodsClassesExtendingAbstractProvider()
+                    .stream()
+                    .collect(Collectors.groupingBy(m -> m.getDeclaringClass().getName()))
+                    .forEach((String k, List<Method> v) -> {
+                        System_out_format("%nClass: %s%n", k);
+                        v.forEach(method -> System_out_format("%s.%s, #args %d%n",
+                                method.getDeclaringClass().getSimpleName(),
+                                method,
+                                method.getParameterCount()
+                        ));
+                    });
+        }
+    }
+
+    private void handleSampleModes(SampleModes sampleModes) {
+        SamplesGenerator samplesGenerator = new SamplesGenerator();
+        Faker faker = createTheFaker();
+        if (sampleModes == SampleModes.expression) {
+            String sampleResult = samplesGenerator.sampleExpression(faker);
+            System_out_format("sample expression%n%s%n", sampleResult);
+        } else if (sampleModes == SampleModes.csv) {
+            String sampleResult = samplesGenerator.sampleCsv(faker, this.countOfResults);
+            System_out_format("sample csv%n%s%n", sampleResult);
+        } else if (sampleModes == SampleModes.json) {
+            String sampleResult = samplesGenerator.sampleJson(faker, this.countOfResults);
+            System_out_format("sample json%n%s%n", sampleResult);
+        } else if (sampleModes == SampleModes.jsona) {
+            String sampleResult = samplesGenerator.sampleJsona(faker, 5);
+            System_out_format("sample jsona%n%s%n", sampleResult);
+        } else if (sampleModes == SampleModes.providers) {
+        }
     }
 
     /**
