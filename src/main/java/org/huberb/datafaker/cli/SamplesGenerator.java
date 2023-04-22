@@ -20,6 +20,8 @@ import net.datafaker.transformations.CsvTransformer;
 import static net.datafaker.transformations.Field.field;
 import net.datafaker.transformations.JsonTransformer;
 import net.datafaker.transformations.Schema;
+import net.datafaker.transformations.sql.SqlDialect;
+import net.datafaker.transformations.sql.SqlTransformer;
 
 /**
  *
@@ -66,17 +68,16 @@ class SamplesGenerator {
         }
     }
 
-    String sampleJsona(Faker faker, int limit) {
-        String limitAsString = "" + limit;
-        String fieldExpressions1_n = "fullName";
-        String fieldExpressions1_v = "#{Name.fullName}";
-        String fieldExpressions2_n = "fullAddress";
-        String fieldExpressions2_v = "#{Address.fullAddress}";
-        // json array mod 3: length, name, value
-        String resultJsona = faker.jsona(
-                limitAsString, fieldExpressions1_n, fieldExpressions1_v,
-                limitAsString, fieldExpressions2_n, fieldExpressions2_v);
-        return resultJsona;
+    String sampleSql(Faker faker, int limit) {
+        Schema<String, String> schema = Schema.of(
+                field("fullName", () -> faker.name().fullName()),
+                field("fullAddress", () -> faker.address().fullAddress()));
+        SqlTransformer<String> transformer = new SqlTransformer.SqlTransformerBuilder<String>()
+                .batch(5)
+                .tableName("DATAFAKER_NAME_ADDRESS")
+                .dialect(SqlDialect.H2)
+                .build();
+        String resultSql = transformer.generate(schema, limit);
+        return resultSql;
     }
-
 }

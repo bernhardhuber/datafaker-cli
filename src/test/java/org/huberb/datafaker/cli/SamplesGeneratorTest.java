@@ -79,12 +79,7 @@ public class SamplesGeneratorTest {
         );
     }
 
-    /**
-     * Test of sampleCsv method, of class SamplesGenerator.
-     */
-    @Test
-    public void testSampleCsv_5args() {
-    }
+  
 
     /**
      * Test of sampleJson method, of class SamplesGenerator.
@@ -117,7 +112,25 @@ public class SamplesGeneratorTest {
      * Test of sampleJsona method, of class SamplesGenerator.
      */
     @Test
-    public void testSampleJsona() {
+    public void testSampleSql() {
+        /*
+        Sample
+        INSERT INTO DATAFAKER_NAME_ADDRESS ("fullName", "fullAddress")
+        VALUES ('Garfield Spencer', 'Apt. 554 95864 Clifton Flats, Walterfurt, OH 15308'),
+               ('Karma Emmerich', 'Suite 318 520 Tyrone Estates, Champlinchester, VT 18054'),
+               ('Oscar McLaughlin', 'Suite 877 483 Erdman Common, Lake Jared, NE 19287');
+         */
+        String result = instance.sampleSql(faker, 3);
+        String m = "" + result;
+        Assertions.assertAll(
+                () -> assertNotNull(result),
+                () -> assertFalse(result.isBlank()),
+                //() -> assertEquals("", result),
+                () -> assertTrue(result.startsWith("INSERT INTO DATAFAKER_NAME_ADDRESS (\"fullName\", \"fullAddress\")"), m),
+                () -> assertTrue(result.contains("VALUES ("), m),
+                () -> assertTrue(result.contains("),"), m),
+                () -> assertTrue(result.contains(");"), m)
+        );
     }
 
 }

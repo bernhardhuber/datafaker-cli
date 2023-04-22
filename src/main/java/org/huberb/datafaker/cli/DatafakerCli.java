@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.datafaker.Faker;
 import net.datafaker.providers.base.AbstractProvider;
@@ -48,7 +49,7 @@ public class DatafakerCli implements Callable<Integer> {
 
     @Option(names = {"-l", "--locale"},
             required = false,
-            description = "language-tag informat {language}_{country}.")
+            description = "language-tag in format {language}_{country}.")
     private String languageTag;
     @Option(names = {"-c", "--count"},
             required = false,
@@ -60,30 +61,18 @@ public class DatafakerCli implements Callable<Integer> {
             required = false,
             description = "TODO describe me.")
     private boolean expressionOption;
-    @Option(names = {"--csv"},
-            required = false,
-            description = "TODO describe me.")
-    private boolean csvExpressionOption;
-    @Option(names = {"--json"},
-            required = false,
-            description = "TODO describe me.")
-    private boolean jsonExpressionOption;
-    @Option(names = {"--jsona"},
-            required = false,
-            description = "TODO describe me.")
-    private boolean jsonArrayExpressionOption;
 
     @Parameters(index = "0..*", description = "expression arguments.")
     private List<String> expressions;
 
     enum AvailableModes {
-        locales, providers, methods1, methods2
+        locales, providers, providerMethods1, providerMethods2
     }
     @Option(names = {"--available"}, description = "Valid values: ${COMPLETION-CANDIDATES}")
     AvailableModes availableModes;
 
     enum SampleModes {
-        expression, csv, json, jsona, providers
+        expression, csv, json, sql, providers
     }
     @Option(names = {"--samples"}, description = "Valid values: ${COMPLETION-CANDIDATES}")
     SampleModes sampleModes;
@@ -101,7 +90,7 @@ public class DatafakerCli implements Callable<Integer> {
         }
 
         if (availableModes != null) {
-            handleAvaileModes(availableModes);
+            handleAvailableModes(availableModes);
         } else if (sampleModes != null) {
             handleSampleModes(sampleModes);
         } else {
@@ -129,7 +118,7 @@ public class DatafakerCli implements Callable<Integer> {
         System.out.format(format, args);
     }
 
-    private void handleAvaileModes(AvailableModes availableModes) {
+    private void handleAvailableModes(AvailableModes availableModes) {
         if (availableModes == AvailableModes.locales) {
             System_out_format("default locale: %s%n", Locales.defaultLocale().get().toLanguageTag());
             Locales.availableLocales().get().
@@ -142,11 +131,11 @@ public class DatafakerCli implements Callable<Integer> {
             new ProvidersQueries()
                     .findAllClassesExtendingAbstractProvider()
                     .forEach(clazz -> System_out_format("%s : %s%n", clazz.getName(), clazz.getSimpleName()));
-        } else if (availableModes == AvailableModes.methods1) {
+        } else if (availableModes == AvailableModes.providerMethods1) {
             new ProvidersQueries()
                     .findAllMathodsClassesExtendingAbstractProvider()
                     .forEach(method -> System_out_format("%s%n", method));
-        } else if (availableModes == AvailableModes.methods2) {
+        } else if (availableModes == AvailableModes.providerMethods2) {
             new ProvidersQueries()
                     .findAllMathodsClassesExtendingAbstractProvider()
                     .stream()
@@ -174,10 +163,38 @@ public class DatafakerCli implements Callable<Integer> {
         } else if (sampleModes == SampleModes.json) {
             String sampleResult = samplesGenerator.sampleJson(faker, this.countOfResults);
             System_out_format("sample json%n%s%n", sampleResult);
-        } else if (sampleModes == SampleModes.jsona) {
-            String sampleResult = samplesGenerator.sampleJsona(faker, 5);
+        } else if (sampleModes == SampleModes.sql) {
+            String sampleResult = samplesGenerator.sampleSql(faker, this.countOfResults);
             System_out_format("sample jsona%n%s%n", sampleResult);
         } else if (sampleModes == SampleModes.providers) {
+            // Retrieve provider methods
+            Predicate<Method> p = (m) -> {
+                boolean result = true;
+                result = result && m.getParameterCount() == 0;
+                result = result && m.getReturnType().equals(String.class);
+                return result;
+            };
+            List<Method> methodList = new ProvidersQueries().findAllMathodsClassesExtendingAbstractProvider().stream()
+                    .filter(p)
+                    .sorted((m1, m2) -> m1.getClass().getName().compareTo(m2.getClass().getName()))
+                    .collect(Collectors.toList());
+
+            String lastMClass = "";
+            for (Method m : methodList) {
+                String mClass = m.getDeclaringClass().getSimpleName();
+                String mName = m.getName();
+                String expression = String.format("#{%s.%s}", mClass, mName);
+                if (!lastMClass.equals(mClass)) {
+                    System_out_format("---%n");
+                    lastMClass = mClass;
+                }
+                try {
+                    String result = faker.expression(expression);
+                    System_out_format("sample %s: %s%n", expression, result);
+                } catch (Exception ex) {
+                    System_out_format("Failed sample method %s, expression %s%nexception: %s%n", m, expression, ex);
+                }
+            }
         }
     }
 
