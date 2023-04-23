@@ -18,6 +18,7 @@ package org.huberb.datafaker.cli;
 import java.util.Locale;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -61,7 +62,7 @@ public class SamplesGeneratorTest {
      * Test of sampleCsv method, of class SamplesGenerator.
      */
     @Test
-    public void testSampleCsv_Faker_int() {
+    public void testSampleCsv() {
         /*
         Sample:
         "fullName","fullAddress"
@@ -78,8 +79,6 @@ public class SamplesGeneratorTest {
                 () -> assertTrue(result.startsWith("\"fullName\",\"fullAddress\""), m)
         );
     }
-
-  
 
     /**
      * Test of sampleJson method, of class SamplesGenerator.
@@ -109,7 +108,7 @@ public class SamplesGeneratorTest {
     }
 
     /**
-     * Test of sampleJsona method, of class SamplesGenerator.
+     * Test of sampleSql method, of class SamplesGenerator.
      */
     @Test
     public void testSampleSql() {
@@ -130,6 +129,23 @@ public class SamplesGeneratorTest {
                 () -> assertTrue(result.contains("VALUES ("), m),
                 () -> assertTrue(result.contains("),"), m),
                 () -> assertTrue(result.contains(");"), m)
+        );
+    }
+
+    /**
+     * Test of sampleSql method, of class SamplesGenerator.
+     */
+    @Test
+    public void testSampleProviders() {
+        /*
+        Sample
+         */
+        String result = instance.sampleProviders(faker, 3);
+        String m = "" + result;
+        Assertions.assertAll(
+                () -> assertNotNull(result),
+                () -> assertFalse(result.isBlank()),
+                () -> assertEquals("", result)
         );
     }
 

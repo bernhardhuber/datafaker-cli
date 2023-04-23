@@ -15,6 +15,10 @@
  */
 package org.huberb.datafaker.cli;
 
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import net.datafaker.Faker;
 import net.datafaker.transformations.CsvTransformer;
 import static net.datafaker.transformations.Field.field;
@@ -22,6 +26,7 @@ import net.datafaker.transformations.JsonTransformer;
 import net.datafaker.transformations.Schema;
 import net.datafaker.transformations.sql.SqlDialect;
 import net.datafaker.transformations.sql.SqlTransformer;
+import org.huberb.datafaker.cli.DatafakerCli.ProvidersQueries;
 
 /**
  *
@@ -79,5 +84,40 @@ class SamplesGenerator {
                 .build();
         String resultSql = transformer.generate(schema, limit);
         return resultSql;
+    }
+
+    String sampleProviders(Faker faker, int limit) {
+        String resultProviders = "";
+        // Retrieve provider methods
+        Predicate<Method> p = (m) -> {
+            boolean result = true;
+            result = result && m.getParameterCount() == 0;
+            result = result && m.getReturnType().equals(String.class);
+            return result;
+        };
+        List<Method> methodList = new ProvidersQueries().findAllMathodsClassesExtendingAbstractProvider().stream()
+                .filter(p)
+                .sorted((m1, m2) -> m1.getClass().getName().compareTo(m2.getClass().getName()))
+                .collect(Collectors.toList());
+
+        String lastMClass = "";
+        for (Method m : methodList) {
+
+            String mClass = m.getDeclaringClass().getSimpleName();
+            String mName = m.getName();
+            String expression = String.format("#{%s.%s}", mClass, mName);
+            if (!lastMClass.equals(mClass)) {
+                resultProviders += String.format("---%n");
+                lastMClass = mClass;
+            }
+            try {
+                String result = faker.expression(expression);
+                resultProviders += String.format("%s: %s%n", expression, result);
+            } catch (Exception ex) {
+                resultProviders += String.format("Failed sample method %s, expression %s%nexception: %s%n", m, expression, ex);
+            }
+
+        }
+        return resultProviders;
     }
 }
