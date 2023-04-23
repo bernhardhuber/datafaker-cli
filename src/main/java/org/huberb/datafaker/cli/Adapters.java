@@ -32,7 +32,7 @@ public class Adapters {
     private Adapters() {
     }
 
-    static class FakerFactory {
+    public static class FakerFactory {
 
         public static Faker createFakerFromLocale(String languageTag) {
             Locale locale = Locale.forLanguageTag(languageTag);
@@ -43,13 +43,12 @@ public class Adapters {
             return new Faker(locale);
         }
 
-
     }
 
     /**
      * Adopting locale-api.
      */
-    static class Locales {
+    public static class Locales {
 
         public static Supplier<List<Locale>> availableLocales() {
             return () -> Arrays.asList(Locale.getAvailableLocales());
