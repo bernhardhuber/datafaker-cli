@@ -16,10 +16,13 @@
 package org.huberb.datafaker.cli;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.datafaker.Faker;
+import net.datafaker.providers.base.AbstractProvider;
 import net.datafaker.transformations.CsvTransformer;
 import static net.datafaker.transformations.Field.field;
 import net.datafaker.transformations.JsonTransformer;
@@ -86,8 +89,8 @@ class SamplesGenerator {
         return resultSql;
     }
 
-    String sampleProviders(Faker faker, int limit) {
-        String resultProviders = "";
+    String sampleProviders(Faker faker) {
+        StringBuilder sb = new StringBuilder();
         // Retrieve provider methods
         Predicate<Method> p = (m) -> {
             boolean result = true;
@@ -107,17 +110,64 @@ class SamplesGenerator {
             String mName = m.getName();
             String expression = String.format("#{%s.%s}", mClass, mName);
             if (!lastMClass.equals(mClass)) {
-                resultProviders += String.format("---%n");
+                sb.append(String.format("---%n"));
                 lastMClass = mClass;
             }
             try {
                 String result = faker.expression(expression);
-                resultProviders += String.format("%s: %s%n", expression, result);
+                sb.append(String.format("%s: %s%n", expression, result));
             } catch (Exception ex) {
-                resultProviders += String.format("Failed sample method %s, expression %s%nexception: %s%n", m, expression, ex);
+                sb.append(String.format("Failed sample method %s, expression %s%nexception: %s%n", m, expression, ex));
             }
 
         }
+        String resultProviders = sb.toString();
+        return resultProviders;
+    }
+
+    String sampleProviders2(Faker faker) {
+        StringBuilder sb = new StringBuilder();
+        Predicate<Method> mP1 = m -> {
+
+            boolean isMatch = true;
+            isMatch = isMatch && m.getParameterCount() == 0;
+            isMatch = isMatch && AbstractProvider.class.isAssignableFrom(m.getReturnType());
+            isMatch = isMatch && Modifier.isPublic(m.getModifiers());
+            return isMatch;
+        };
+        Predicate<Method> mP2 = m -> {
+
+            boolean isMatch = true;
+            isMatch = isMatch && m.getParameterCount() == 0;
+            isMatch = isMatch && m.getReturnType().equals(String.class);
+            isMatch = isMatch && Modifier.isPublic(m.getModifiers());
+            return isMatch;
+        };
+        Method[] methods1 = faker.getClass().getMethods();
+        List<Method> providerMethodsInFaker = Arrays.asList(methods1).stream()
+                .filter(mP1)
+                .sorted((m1, m2) -> m1.getDeclaringClass().getName().compareTo(m2.getDeclaringClass().getName()))
+                .collect(Collectors.toList());
+        for (Method m : providerMethodsInFaker) {
+            try {
+                AbstractProvider ap = (AbstractProvider) m.invoke(faker);
+                Arrays.asList(ap.getClass().getDeclaredMethods()).stream()
+                        .filter(mP2)
+                        .sorted((m1, m2) -> m1.getDeclaringClass().getName().compareTo(m2.getDeclaringClass().getName()))
+                        .forEach(mInAbstractProvider -> {
+                            try {
+                                String result = (String) mInAbstractProvider.invoke(ap);
+                                sb.append(String.format("ap %s#%s: %s%n", ap.getClass(), mInAbstractProvider.getName(), result));
+                            } catch (Exception ex) {
+                                sb.append(String.format("Failed invoking abstract provider instance method %s%n", mInAbstractProvider));
+                            }
+
+                        });
+            } catch (Exception ex) {
+                sb.append(String.format("Failed creating abstract provider instance using method %s%n", m, ex));
+            }
+        }
+        String resultProviders = sb.toString();
         return resultProviders;
     }
 }

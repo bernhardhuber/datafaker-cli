@@ -18,8 +18,8 @@ package org.huberb.datafaker.cli;
 import java.util.Locale;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.Assertions;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +41,7 @@ public class FakerTest {
         String result = faker.relationships().direct();
         Assertions.assertAll(
                 () -> assertNotNull(result),
-                () -> assertEquals("", result)
+                () -> assertTrue(!result.isBlank(),""+result)
         );
     }
 }

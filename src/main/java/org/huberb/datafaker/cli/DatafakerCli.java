@@ -166,7 +166,7 @@ public class DatafakerCli implements Callable<Integer> {
             String sampleResult = samplesGenerator.sampleSql(faker, this.countOfResults);
             System_out_format("sample sql%n%s%n", sampleResult);
         } else if (sampleModes == SampleModes.providers) {
-            String sampleProviders = samplesGenerator.sampleProviders(faker, this.countOfResults);
+            String sampleProviders = samplesGenerator.sampleProviders2(faker);
             System_out_format("sample providers%n%s%n", sampleProviders);
         }
     }

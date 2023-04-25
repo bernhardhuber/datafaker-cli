@@ -71,7 +71,7 @@ public class SvnrProviderTest {
                 () -> assertTrue(result.length() == 3 + 1 + 6, m),
                 () -> assertTrue(allDigitsPredicate.test(result), m)
         );
-System.out.format("testSvnr %s%n", result);
+        //System.out.format("testSvnr %s%n", result);
     }
 
     /**
@@ -89,7 +89,7 @@ System.out.format("testSvnr %s%n", result);
                 () -> assertTrue(allDigitsPredicate.test(result), m),
                 () -> assertTrue(result.endsWith(geburtsdatum), m)
         );
-System.out.format("testSvnrFor %s%n", result);
+        //System.out.format("testSvnrFor %s%n", result);
     }
 
 }
