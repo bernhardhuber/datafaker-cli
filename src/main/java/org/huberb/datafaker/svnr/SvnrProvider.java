@@ -20,7 +20,7 @@ import net.datafaker.providers.base.AbstractProvider;
 import net.datafaker.providers.base.BaseProviders;
 
 /**
- * Berechnung SVNR.
+ * Berechnung österreichischer Sozialversicherungsnummer (SVNR).
  * <p>
  * Die Prüfziffer kann wie folgt errechnet werden:[1]
  * <p>
@@ -46,10 +46,11 @@ import net.datafaker.providers.base.BaseProviders;
  *
  * @see "https://de.wikipedia.org/wiki/Sozialversicherungsnummer"
  * @author berni3
+ * @since 1.0
  */
 public class SvnrProvider extends AbstractProvider<BaseProviders> {
 
-    private Predicate<String> allDigitsPredicate = s -> {
+    private final Predicate<String> allDigitsPredicate = s -> {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             if (!Character.isDigit(c)) {
@@ -58,8 +59,8 @@ public class SvnrProvider extends AbstractProvider<BaseProviders> {
         }
         return true;
     };
-    private int[] mulLaufnummer = {3, 7, 9};
-    private int[] mulGeburtsdatum = {5, 8, 4, 2, 1, 6};
+    private final int[] mulLaufnummer = {3, 7, 9};
+    private final int[] mulGeburtsdatum = {5, 8, 4, 2, 1, 6};
 
     public SvnrProvider(BaseProviders faker) {
         super(faker);
@@ -101,30 +102,31 @@ public class SvnrProvider extends AbstractProvider<BaseProviders> {
         }
 
         String laufendeNummer = "" + laufendeNummerInt;
-
-        int laufendeNummer_0 = laufendeNummer.charAt(0) - '0';
-        int laufendeNummer_1 = laufendeNummer.charAt(1) - '0';
-        int laufendeNummer_2 = laufendeNummer.charAt(2) - '0';
-
         int pruefnummer = 0;
-        pruefnummer += laufendeNummer_0 * mulLaufnummer[0];
-        pruefnummer += laufendeNummer_1 * mulLaufnummer[1];
-        pruefnummer += laufendeNummer_2 * mulLaufnummer[2];
+        {
+            int laufendeNummer_0 = Character.getNumericValue(laufendeNummer.charAt(0));
+            int laufendeNummer_1 = Character.getNumericValue(laufendeNummer.charAt(1));
+            int laufendeNummer_2 = Character.getNumericValue(laufendeNummer.charAt(2));
 
-        int geburtsdatum_0 = geburtsdatum.charAt(0) - '0';
-        int geburtsdatum_1 = geburtsdatum.charAt(1) - '0';
-        int geburtsdatum_2 = geburtsdatum.charAt(2) - '0';
-        int geburtsdatum_3 = geburtsdatum.charAt(3) - '0';
-        int geburtsdatum_4 = geburtsdatum.charAt(4) - '0';
-        int geburtsdatum_5 = geburtsdatum.charAt(5) - '0';
+            pruefnummer += laufendeNummer_0 * mulLaufnummer[0];
+            pruefnummer += laufendeNummer_1 * mulLaufnummer[1];
+            pruefnummer += laufendeNummer_2 * mulLaufnummer[2];
+        }
+        {
+            int geburtsdatum_0 = Character.getNumericValue(geburtsdatum.charAt(0));
+            int geburtsdatum_1 = Character.getNumericValue(geburtsdatum.charAt(1));
+            int geburtsdatum_2 = Character.getNumericValue(geburtsdatum.charAt(2));
+            int geburtsdatum_3 = Character.getNumericValue(geburtsdatum.charAt(3));
+            int geburtsdatum_4 = Character.getNumericValue(geburtsdatum.charAt(4));
+            int geburtsdatum_5 = Character.getNumericValue(geburtsdatum.charAt(5));
 
-        pruefnummer += geburtsdatum_0 * mulGeburtsdatum[0];
-        pruefnummer += geburtsdatum_1 * mulGeburtsdatum[1];
-        pruefnummer += geburtsdatum_2 * mulGeburtsdatum[2];
-        pruefnummer += geburtsdatum_3 * mulGeburtsdatum[3];
-        pruefnummer += geburtsdatum_4 * mulGeburtsdatum[4];
-        pruefnummer += geburtsdatum_5 * mulGeburtsdatum[5];
-
+            pruefnummer += geburtsdatum_0 * mulGeburtsdatum[0];
+            pruefnummer += geburtsdatum_1 * mulGeburtsdatum[1];
+            pruefnummer += geburtsdatum_2 * mulGeburtsdatum[2];
+            pruefnummer += geburtsdatum_3 * mulGeburtsdatum[3];
+            pruefnummer += geburtsdatum_4 * mulGeburtsdatum[4];
+            pruefnummer += geburtsdatum_5 * mulGeburtsdatum[5];
+        }
         int pruefziffer = pruefnummer % 11;
         if (pruefziffer == 10) {
             return null;
@@ -138,7 +140,7 @@ public class SvnrProvider extends AbstractProvider<BaseProviders> {
 
     private int genLaufendeNummer() {
         int result = faker.random().nextInt(100, 999);
-        System.out.format("genLaufendeNummer %d%n", result);
+        //System.out.format("genLaufendeNummer %d%n", result);
         return result;
     }
 

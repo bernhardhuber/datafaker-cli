@@ -43,19 +43,19 @@ public class SvnrProviderTest {
         return true;
     };
 
-    SvnrProvider instance;
-
     @BeforeAll
     public static void setUpAll() {
         faker = Adapters.FakerFactory.createFakerFromLocale(Locale.getDefault());
     }
 
+    SvnrProvider instance;
+
+    public SvnrProviderTest() {
+    }
+
     @BeforeEach
     public void setUpEach() {
         this.instance = new SvnrProvider(faker);
-    }
-
-    public SvnrProviderTest() {
     }
 
     /**
