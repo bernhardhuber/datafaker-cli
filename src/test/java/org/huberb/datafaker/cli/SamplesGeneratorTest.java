@@ -15,10 +15,17 @@
  */
 package org.huberb.datafaker.cli;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import net.datafaker.Faker;
+import net.datafaker.providers.base.AbstractProvider;
 import org.junit.jupiter.api.Assertions;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -144,9 +151,55 @@ public class SamplesGeneratorTest {
         String m = "" + result;
         Assertions.assertAll(
                 () -> assertNotNull(result),
-                () -> assertFalse(result.isBlank()),
-                () -> assertEquals("", result)
+                //() -> assertEquals("", result),
+                () -> assertFalse(result.isBlank())
         );
     }
 
+    @Test
+    public void hello1() throws NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+//        Set<String> allowedFakerMetods = new HashSet<>() {
+//            {
+//                add("address");
+//                add("name");
+//            }
+//        };
+        Predicate<Method> mP1 = m -> {
+
+            boolean isMatch = true;
+            isMatch = isMatch && m.getParameterCount() == 0;
+            isMatch = isMatch && AbstractProvider.class.isAssignableFrom(m.getReturnType());
+            isMatch = isMatch && Modifier.isPublic(m.getModifiers());
+            //isMatch = isMatch && allowedFakerMetods.contains(m.getName());
+            return isMatch;
+        };
+        Predicate<Method> mP2 = m -> {
+
+            boolean isMatch = true;
+            isMatch = isMatch && m.getParameterCount() == 0;
+            isMatch = isMatch && m.getReturnType().equals(String.class);
+            isMatch = isMatch && Modifier.isPublic(m.getModifiers());
+            return isMatch;
+        };
+        Method[] methods1 = faker.getClass().getMethods();
+        List<Method> providerMethodsInFaker = Arrays.asList(methods1).stream()
+                .filter(mP1)
+                .sorted((m1, m2) -> m1.getDeclaringClass().getName().compareTo(m2.getDeclaringClass().getName()))
+                .collect(Collectors.toList());
+        for (Method m : providerMethodsInFaker) {
+            AbstractProvider ap = (AbstractProvider) m.invoke(faker);
+            Arrays.asList(ap.getClass().getDeclaredMethods()).stream()
+                    .filter(mP2)
+                    .sorted((m1, m2) -> m1.getDeclaringClass().getName().compareTo(m2.getDeclaringClass().getName()))
+                    .forEach(m2 -> {
+                        try {
+                            String result = (String) m2.invoke(ap);
+                            System.out.format("ap %s#%s: %s%n", ap.getClass(), m2.getName(), result);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+
+                    });
+        }
+    }
 }
