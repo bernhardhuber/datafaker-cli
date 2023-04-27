@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author berni3
  */
-public class Icd3DiseasesTest {
+public class Icd3DiseasesYamlTest {
 
     static Faker faker;
     static Predicate<String> icdCodePredicate = s -> {
@@ -42,15 +42,15 @@ public class Icd3DiseasesTest {
     public static void setUpAll() {
         faker = Adapters.FakerFactory.createFakerFromLocale(Locale.GERMAN);
     }
-    private Icd3Diseases instance;
+    private Icd3DiseasesYaml instance;
 
     @BeforeEach
     public void setUp() {
-        instance = faker.getProvider(Icd3Diseases.class, Icd3Diseases::new, faker);
+        instance = faker.getProvider(Icd3DiseasesYaml.class, Icd3DiseasesYaml::new, faker);
     }
 
     @Test
-    public void testIcdCode() {
+    public void testIcdCodeYml() {
         String result = instance.icdCode();
         assertNotNull(result);
         assertEquals(3, result.length(), "" + result);
@@ -59,7 +59,7 @@ public class Icd3DiseasesTest {
     }
 
     @Test
-    public void testDisease() {
+    public void testDiseaseYml() {
         String result = instance.disease();
         assertNotNull(result);
         assertTrue(result.length() > 1, "" + result);
