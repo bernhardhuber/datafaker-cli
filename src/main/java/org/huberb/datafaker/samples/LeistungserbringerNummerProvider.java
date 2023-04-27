@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.huberb.datafaker.svnr;
+package org.huberb.datafaker.samples;
 
 import net.datafaker.providers.base.AbstractProvider;
 import net.datafaker.providers.base.BaseProviders;
