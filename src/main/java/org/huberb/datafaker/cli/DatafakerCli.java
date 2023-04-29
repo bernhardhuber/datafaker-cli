@@ -142,8 +142,8 @@ public class DatafakerCli implements Callable<Integer> {
 
             if (dfp.getCountOfExpressions() == 0) {
                 dfp.addExpressionsFromStringList(Arrays.asList(
-                        "fullName: #{Name.fullName}",
-                        "fullAddress: #{Address.fullAddress}"));
+                        "#{Name.fullName}",
+                        "#{Address.fullAddress}"));
             }
             System_out_format("expression: %s%n", dfp.textRepresentation());
             // step 2: format
