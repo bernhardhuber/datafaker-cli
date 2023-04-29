@@ -32,8 +32,8 @@ import org.junit.jupiter.api.RepeatedTest;
  */
 public class SvnrProviderTest {
 
-    static Faker faker;
-    static Predicate<String> allDigitsPredicate = s -> {
+    private static Faker faker;
+    private static Predicate<String> allDigitsPredicate = s -> {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             if (!Character.isDigit(c)) {
@@ -48,14 +48,11 @@ public class SvnrProviderTest {
         faker = Adapters.FakerFactory.createFakerFromLocale(Locale.getDefault());
     }
 
-    SvnrProvider instance;
-
-    public SvnrProviderTest() {
-    }
+    private SvnrProvider instance;
 
     @BeforeEach
     public void setUpEach() {
-        this.instance = new SvnrProvider(faker);
+        instance = faker.getProvider(SvnrProvider.class, SvnrProvider::new, faker);
     }
 
     /**

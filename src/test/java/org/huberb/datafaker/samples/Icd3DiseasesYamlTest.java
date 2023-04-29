@@ -33,8 +33,8 @@ import org.junit.jupiter.api.Test;
  */
 public class Icd3DiseasesYamlTest {
 
-    static Faker faker;
-    static Predicate<String> icdCodePredicate = s -> {
+    private static Faker faker;
+    private static Predicate<String> icdCodePredicate = s -> {
         return Pattern.matches("[A-Z]\\d\\d", s);
     };
 

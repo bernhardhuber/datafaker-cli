@@ -32,8 +32,8 @@ import org.junit.jupiter.api.Test;
  */
 public class LeistungserbringerNummerProviderTest {
 
-    static Faker faker;
-    static Predicate<String> allDigitsPredicate = s -> {
+    private static Faker faker;
+    private static Predicate<String> allDigitsPredicate = s -> {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             if (!Character.isDigit(c)) {
@@ -47,11 +47,11 @@ public class LeistungserbringerNummerProviderTest {
     public static void setUpAll() {
         faker = Adapters.FakerFactory.createFakerFromLocale(Locale.getDefault());
     }
-    LeistungserbringerNummerProvider instance;
+    private LeistungserbringerNummerProvider instance;
 
     @BeforeEach
     public void setUp() {
-        instance = new LeistungserbringerNummerProvider(faker);
+        instance = faker.getProvider(LeistungserbringerNummerProvider.class, LeistungserbringerNummerProvider::new, faker);
     }
 
     /**
