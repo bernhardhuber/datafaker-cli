@@ -17,6 +17,7 @@ package org.huberb.datafaker.cli;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -28,6 +29,7 @@ import net.datafaker.Faker;
 import net.datafaker.providers.base.AbstractProvider;
 import org.huberb.datafaker.cli.Adapters.FakerFactory;
 import org.huberb.datafaker.cli.Adapters.Locales;
+import org.huberb.datafaker.cli.DataFormatProcessor.ExpressionInternal;
 import org.reflections.Reflections;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
@@ -92,14 +94,25 @@ public class DatafakerCli implements Callable<Integer> {
         if (availableModes != null) {
             handleAvailableModes(availableModes);
         } else {
-            String expression = "fullName: #{Name.fullName}, fullAddress: #{Address.fullAddress}";
-            if (expressions != null && !expressions.isEmpty()) {
-                expression = expressions.get(0);
+            // init
+            final Faker faker = createTheFaker();
+            final DataFormatProcessor dfp = new DataFormatProcessor(faker);
+
+            // data
+            List<ExpressionInternal> expressionInternalList = Collections.emptyList();
+            if (this.dataModes == DataModes.sample) {
+                SamplesGenerator samplesGenerator = new SamplesGenerator();
+                expressionInternalList = samplesGenerator.sampleExpressions(faker);
+                dfp.addExpressionsFromExpressionInternalList(expressionInternalList);
+            } else if (this.dataModes == DataModes.expression && expressions != null && !expressions.isEmpty()) {
+                dfp.addExpressionsFromStringList(expressions);
+            } else {
+                List<String> expressions = Arrays.asList("fullName: #{Name.fullName}", "fullAddress: #{Address.fullAddress}");
+                dfp.addExpressionsFromStringList(expressions);
             }
-            System_out_format("expression: %s%n", expression);
-            Faker faker = createTheFaker();
-            DataFormatProcessor dfp = new DataFormatProcessor(faker);
-            String result = dfp.expressions(Arrays.asList(expression)).format(formatEnum);
+            // format
+            System_out_format("expression: %s%n", dfp.textRepresentation());
+            String result = dfp.format(formatEnum);
             System_out_format("result%n%s%n", result);
         }
         return 0;

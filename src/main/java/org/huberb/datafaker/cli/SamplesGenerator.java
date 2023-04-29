@@ -23,12 +23,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.datafaker.Faker;
 import net.datafaker.providers.base.AbstractProvider;
-import net.datafaker.transformations.CsvTransformer;
-import static net.datafaker.transformations.Field.field;
-import net.datafaker.transformations.JsonTransformer;
-import net.datafaker.transformations.Schema;
-import net.datafaker.transformations.sql.SqlDialect;
-import net.datafaker.transformations.sql.SqlTransformer;
 import org.huberb.datafaker.cli.DataFormatProcessor.ExpressionInternal;
 import org.huberb.datafaker.cli.DatafakerCli.ProvidersQueries;
 
@@ -46,58 +40,11 @@ class SamplesGenerator {
         return result;
     }
 
-    String sampleExpression(Faker faker) {
-        String singleExpression = "#{Name.fullName}; #{Address.fullAddress}";
-        String resultExpression = faker.expression(singleExpression);
-        return resultExpression;
+    public List< String> sampleExpressions() {
+        return Arrays.asList("#{Name.fullName}", "#{Address.fullAddress}");
     }
 
-    String sampleCsv(Faker faker, int limit) {
-        Schema<String, String> schema = Schema.of(
-                field("fullName", () -> faker.name().fullName()),
-                field("fullAddress", () -> faker.address().fullAddress()));
-        CsvTransformer<String> transformer = CsvTransformer.<String>builder().header(true).separator(",").build();
-        String resultCsv = transformer.generate(schema, limit);
-        return resultCsv;
-    }
-
-    String sampleJson(Faker faker, int limit) {
-        int mode = 0;
-        if (mode == 0) {
-            Schema<String, String> schema = Schema.of(
-                    field("fullName", () -> faker.name().fullName()),
-                    field("fullAddress", () -> faker.address().fullAddress()));
-            JsonTransformer<String> transformer = JsonTransformer.<String>builder().build();
-            String resultJson = transformer.generate(schema, limit);
-            return resultJson;
-        } else if (mode == 1) {
-            String fieldExpressions1_n = "fullName";
-            String fieldExpressions1_v = faker.name().fullName();
-            String fieldExpressions2_n = "fullAddress";
-            String fieldExpressions2_v = faker.address().fullAddress();
-            // mod 2: field-name, value
-            String resultJson = faker.json(
-                    fieldExpressions1_n, fieldExpressions1_v,
-                    fieldExpressions2_n, fieldExpressions2_v);
-            return resultJson;
-        } else {
-            return "";
-        }
-    }
-
-    String sampleSql(Faker faker, int limit) {
-        Schema<String, String> schema = Schema.of(
-                field("fullName", () -> faker.name().fullName()),
-                field("fullAddress", () -> faker.address().fullAddress()));
-        SqlTransformer<String> transformer = new SqlTransformer.SqlTransformerBuilder<String>()
-                .batch(5)
-                .tableName("DATAFAKER_NAME_ADDRESS")
-                .dialect(SqlDialect.H2)
-                .build();
-        String resultSql = transformer.generate(schema, limit);
-        return resultSql;
-    }
-
+    // TODO adopt me to List<String> or List<ExpressionInternal>
     String sampleProviders(Faker faker) {
         StringBuilder sb = new StringBuilder();
         // Retrieve provider methods
@@ -134,6 +81,7 @@ class SamplesGenerator {
         return resultProviders;
     }
 
+    // TODO adopt me to List<String> or List<ExpressionInternal>
     String sampleProviders2(Faker faker) {
         StringBuilder sb = new StringBuilder();
         Predicate<Method> mP1 = m -> {

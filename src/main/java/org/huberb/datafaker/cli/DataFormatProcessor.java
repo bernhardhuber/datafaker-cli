@@ -24,8 +24,10 @@ import net.datafaker.Faker;
 import net.datafaker.transformations.CsvTransformer;
 import net.datafaker.transformations.Field;
 import net.datafaker.transformations.JsonTransformer;
+import net.datafaker.transformations.JsonTransformer.JsonTransformerBuilder.FormattedAs;
 import net.datafaker.transformations.Schema;
 import net.datafaker.transformations.SimpleField;
+import net.datafaker.transformations.sql.SqlDialect;
 import net.datafaker.transformations.sql.SqlTransformer;
 
 /**
@@ -36,22 +38,7 @@ public class DataFormatProcessor {
 
     private final Faker faker;
 
-    public static class ExpressionInternal {
-
-        final String fieldname;
-        final Supplier<String> expressionSupplier;
-
-        public ExpressionInternal(String fieldname, Supplier<String> expressionSupplier) {
-            this.fieldname = fieldname;
-            this.expressionSupplier = expressionSupplier;
-        }
-    }
     private final List<ExpressionInternal> expressionInternalList;
-
-    public DataFormatProcessor(Faker faker) {
-        this.faker = faker;
-        this.expressionInternalList = new ArrayList<>();
-    }
 
     Function<String, String> extractFieldname = (s) -> {
         String result = s;
@@ -59,10 +46,23 @@ public class DataFormatProcessor {
         if (lastIndexOfDot > 0 && lastIndexOfDot < s.length()) {
             result = s.substring(lastIndexOfDot + 1);
         }
+        result = result.replace('{', ' ')
+                .replace('}', ' ').trim();
         return result;
     };
 
-    public DataFormatProcessor expressions(List<String> expressions) {
+    public DataFormatProcessor(Faker faker) {
+        this.faker = faker;
+        this.expressionInternalList = new ArrayList<>();
+    }
+
+    public DataFormatProcessor addExpressionsFromExpressionInternalList(List<ExpressionInternal> expressions) {
+        expressionInternalList.clear();
+        expressionInternalList.addAll(expressions);
+        return this;
+    }
+
+    public DataFormatProcessor addExpressionsFromStringList(List<String> expressions) {
         for (String expression : expressions) {
             String fieldname = extractFieldname.apply(expression);
             Supplier<String> supp = () -> faker.expression(expression);
@@ -75,8 +75,13 @@ public class DataFormatProcessor {
         return this.expressionInternalList.size();
     }
 
-    public enum FormatEnum {
-        txt, csv, tsv, json, sql, html, pdf
+    public String textRepresentation() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("locale: %s%n", faker.getContext().getLocale()));
+        expressionInternalList.forEach(ei -> {
+            sb.append(String.format("fieldname %s%n", ei.fieldname));
+        });
+        return sb.toString();
     }
 
     public String format(FormatEnum fe) {
@@ -139,6 +144,7 @@ public class DataFormatProcessor {
                 .collect(Collectors.toList());
         Schema<Object, String> schema = Schema.of(l.toArray(new SimpleField[0]));
         JsonTransformer transformer = JsonTransformer.<String>builder()
+                .formattedAs(FormattedAs.JSON_ARRAY)
                 .build();
         int limit = 5;
         String result = transformer.generate(schema, limit);
@@ -151,9 +157,27 @@ public class DataFormatProcessor {
                 .collect(Collectors.toList());
         Schema<Object, String> schema = Schema.of(l.toArray(new SimpleField[0]));
         SqlTransformer transformer = SqlTransformer.<String>builder()
+                .batch(5)
+                .tableName("DATAFAKER_TABLE")
+                .dialect(SqlDialect.H2)
                 .build();
         int limit = 5;
         String result = transformer.generate(schema, limit);
         return result;
+    }
+
+    public static class ExpressionInternal {
+
+        final String fieldname;
+        final Supplier<String> expressionSupplier;
+
+        public ExpressionInternal(String fieldname, Supplier<String> expressionSupplier) {
+            this.fieldname = fieldname;
+            this.expressionSupplier = expressionSupplier;
+        }
+    }
+
+    public enum FormatEnum {
+        txt, csv, tsv, json, sql, html, pdf
     }
 }

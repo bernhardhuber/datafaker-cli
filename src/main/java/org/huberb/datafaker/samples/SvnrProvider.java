@@ -81,6 +81,9 @@ public class SvnrProvider extends AbstractProvider<BaseProviders> {
             String result = calcSvnrWithPruefziffer(geburtsdatum, laufendeNummerInt);
             if (result == null) {
                 laufendeNummerInt += 1;
+                if (laufendeNummerInt >= 1000) {
+                    laufendeNummerInt = 100;
+                }
             } else {
                 return result;
             }
@@ -96,7 +99,7 @@ public class SvnrProvider extends AbstractProvider<BaseProviders> {
             throw new RuntimeException(String.format("Geburtsdatum invalid: %s", geburtsdatum));
         }
         Predicate<Integer> validLaufendenummerP = i -> laufendeNummerInt >= 100
-                && laufendeNummerInt <= 1000;
+                && laufendeNummerInt < 1000;
         if (!validLaufendenummerP.test(laufendeNummerInt)) {
             throw new RuntimeException(String.format("Laufendenummer invalid: %d", laufendeNummerInt));
         }

@@ -44,7 +44,7 @@ public class DataFormatProcessorTest {
     @Test
     public void testExpressions() {
         instance = new DataFormatProcessor(faker);
-        instance.expressions(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
+        instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
         assertEquals(2, instance.getCountOfExpressions());
     }
 
@@ -54,7 +54,7 @@ public class DataFormatProcessorTest {
     @Test
     public void testFormatTxt() {
         instance = new DataFormatProcessor(faker);
-        instance.expressions(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
+        instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
         String result1 = instance.formatTxt();
         assertTrue(!result1.isBlank(), "" + result1);
     }
@@ -65,7 +65,7 @@ public class DataFormatProcessorTest {
     @Test
     public void testFormatCsv() {
         instance = new DataFormatProcessor(faker);
-        instance.expressions(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
+        instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
         String result2 = instance.formatCsv();
         assertTrue(!result2.isBlank(), "" + result2);
     }
@@ -76,7 +76,7 @@ public class DataFormatProcessorTest {
     @Test
     public void testFormatTsv() {
         instance = new DataFormatProcessor(faker);
-        instance.expressions(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
+        instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
         String result2 = instance.formatTsv();
         assertTrue(!result2.isBlank(), "" + result2);
     }
@@ -87,7 +87,7 @@ public class DataFormatProcessorTest {
     @Test
     public void testFormatJson() {
         instance = new DataFormatProcessor(faker);
-        instance.expressions(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
+        instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
         String result3 = instance.formatJson();
         assertTrue(!result3.isBlank(), "" + result3);
     }
@@ -98,7 +98,7 @@ public class DataFormatProcessorTest {
     @Test
     public void testFormatSql() {
         instance = new DataFormatProcessor(faker);
-        instance.expressions(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
+        instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
         String result4 = instance.formatSql();
         assertTrue(!result4.isBlank(), "" + result4);
     }
@@ -109,7 +109,7 @@ public class DataFormatProcessorTest {
     @Test
     public void testFormat() {
         instance = new DataFormatProcessor(faker);
-        instance.expressions(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
+        instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
         {
             String result1 = instance.format(FormatEnum.txt);
             assertTrue(!result1.isBlank(), "" + result1);
