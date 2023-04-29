@@ -39,6 +39,7 @@ public class DataFormatProcessor {
     private final Faker faker;
 
     private final List<ExpressionInternal> expressionInternalList;
+    private final int limit;
 
     Function<String, String> extractFieldname = (s) -> {
         String result = s;
@@ -52,8 +53,16 @@ public class DataFormatProcessor {
     };
 
     public DataFormatProcessor(Faker faker) {
+        this(faker, 3);
+    }
+
+    public DataFormatProcessor(Faker faker, int limit) {
         this.faker = faker;
         this.expressionInternalList = new ArrayList<>();
+        if (limit <= 0) {
+            limit = 3;
+        }
+        this.limit = limit;
     }
 
     public DataFormatProcessor addExpressionsFromExpressionInternalList(List<ExpressionInternal> expressions) {
@@ -118,7 +127,7 @@ public class DataFormatProcessor {
                 .header(true)
                 .separator(",")
                 .build();
-        int limit = 5;
+
         String result = transformer.generate(schema, limit);
         return result;
 
@@ -133,7 +142,7 @@ public class DataFormatProcessor {
                 .header(true)
                 .separator("\t")
                 .build();
-        int limit = 5;
+
         String result = transformer.generate(schema, limit);
         return result;
     }
@@ -161,7 +170,7 @@ public class DataFormatProcessor {
                 .tableName("DATAFAKER_TABLE")
                 .dialect(SqlDialect.H2)
                 .build();
-        int limit = 5;
+
         String result = transformer.generate(schema, limit);
         return result;
     }
