@@ -13,7 +13,7 @@
         <exec.mainClass>org.huberb.datafaker.cli.DatafakerCli</exec.mainClass>
 
         <datafaker.version>1.8.1</datafaker.version>
-        <picocli.version>4.6.1</picocli.version>
+        <picocli.version>4.7.3</picocli.version>
     </properties>
     
     <dependencyManagement>
@@ -47,6 +47,24 @@
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId> 
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.6.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.6.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.6.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     

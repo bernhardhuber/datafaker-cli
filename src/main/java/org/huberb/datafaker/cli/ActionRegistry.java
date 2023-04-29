@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  * @author berni3
  */
 class ActionRegistry<K, T> {
-    
+
     private final Consumer<T> noop = any -> {
     };
     private Map<K, Consumer<T>> registry = new HashMap<>();
@@ -38,7 +38,7 @@ class ActionRegistry<K, T> {
         registry.getOrDefault(key, noop).accept(t);
     }
 
-    public static <T> void consuming(Integer i, T t, Consumer<T>... actions) {
+    public static <T> void consumingOneOf(Integer i, T t, Consumer<T>... actions) {
         final ActionRegistry<Integer, T> actionRegistry = new ActionRegistry<>();
         for (int j = 0; j < actions.length; j++) {
             actionRegistry.register(j, actions[j]);
@@ -46,12 +46,12 @@ class ActionRegistry<K, T> {
         actionRegistry.consume(i, t);
     }
 
-    public static <T> void consuming(Enum e, T t, Consumer<T>... actions) {
+    public static <T> void consumingOneOf(Enum e, T t, Consumer<T>... actions) {
         final ActionRegistry<Integer, T> actionRegistry = new ActionRegistry<>();
         for (int j = 0; j < actions.length; j++) {
             actionRegistry.register(j, actions[j]);
         }
         actionRegistry.consume(e.ordinal(), t);
     }
-    
+
 }

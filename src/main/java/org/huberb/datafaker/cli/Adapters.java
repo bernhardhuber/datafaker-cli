@@ -23,35 +23,32 @@ import java.util.function.Supplier;
 import net.datafaker.Faker;
 
 /**
+ * Adopting faker-api.
  *
  * @author berni3
  */
-public class FakerAdapter {
+public class Adapters {
 
-    public static Faker createFakerFromLocale(String languageTag) {
-        Locale locale = Locale.forLanguageTag(languageTag);
-        return createFakerFromLocale(locale);
+    private Adapters() {
     }
 
-    public static Faker createFakerFromLocale(Locale locale) {
-        return new Faker(locale);
+    public static class FakerFactory {
+
+        public static Faker createFakerFromLocale(String languageTag) {
+            Locale locale = Locale.forLanguageTag(languageTag);
+            return createFakerFromLocale(locale);
+        }
+
+        public static Faker createFakerFromLocale(Locale locale) {
+            return new Faker(locale);
+        }
+
     }
 
-    final Faker faker;
-
-    public FakerAdapter(Faker faker) {
-        this.faker = faker;
-    }
-
-    String expression(String expression) {
-        return faker.expression(expression);
-    }
-
-    String csv(int limit, String... columnExpressions) {
-        return faker.csv(limit, columnExpressions);
-    }
-
-    static class Locales {
+    /**
+     * Adopting locale-api.
+     */
+    public static class Locales {
 
         public static Supplier<List<Locale>> availableLocales() {
             return () -> Arrays.asList(Locale.getAvailableLocales());
