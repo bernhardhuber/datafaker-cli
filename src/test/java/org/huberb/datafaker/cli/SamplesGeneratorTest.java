@@ -20,6 +20,7 @@ import java.util.Locale;
 import net.datafaker.Faker;
 import org.huberb.datafaker.cli.DataFormatProcessor.ExpressionInternal;
 import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,17 +33,16 @@ import org.junit.jupiter.api.Test;
  */
 public class SamplesGeneratorTest {
 
-    static Faker faker;
-
-    SamplesGenerator instance;
+    private static Faker faker;
 
     @BeforeAll
-    static void setUpAll() {
+    public static void setUpAll() {
         faker = Adapters.FakerFactory.createFakerFromLocale(Locale.getDefault());
     }
+    private SamplesGenerator instance;
 
     @BeforeEach
-    void setUpEach() {
+    public void setUpEach() {
         this.instance = new SamplesGenerator();
     }
 
@@ -54,7 +54,8 @@ public class SamplesGeneratorTest {
         List<ExpressionInternal> result = instance.sampleExpressions(faker);
         Assertions.assertAll(
                 () -> assertNotNull(result),
-                () -> assertFalse(result.isEmpty())
+                () -> assertFalse(result.isEmpty()),
+                () -> assertEquals(2, result.size())
         );
     }
 
@@ -63,7 +64,8 @@ public class SamplesGeneratorTest {
         List<String> result = instance.sampleExpressions();
         Assertions.assertAll(
                 () -> assertNotNull(result),
-                () -> assertFalse(result.isEmpty())
+                () -> assertFalse(result.isEmpty()),
+                () -> assertEquals(2, result.size())
         );
     }
 
