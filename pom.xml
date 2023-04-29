@@ -13,7 +13,7 @@
         <exec.mainClass>org.huberb.datafaker.cli.DatafakerCli</exec.mainClass>
 
         <datafaker.version>1.8.1</datafaker.version>
-        <picocli.version>4.6.1</picocli.version>
+        <picocli.version>4.7.3</picocli.version>
     </properties>
     
     <dependencyManagement>
