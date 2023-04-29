@@ -68,7 +68,7 @@ public class DatafakerCli implements Callable<Integer> {
     private int countOfResults;
 
     enum DataModes {
-        expression, sample, sampleProvider, sampleProvider2
+        expression, sample, sampleProvider1, sampleProvider2
     }
     @Option(names = {"--expression"},
             required = false,
@@ -123,9 +123,9 @@ public class DatafakerCli implements Callable<Integer> {
                 dfp.addExpressionsFromExpressionInternalList(samplesGenerator.sampleExpressions(faker));
             } else if (this.dataModes == DataModes.expression && isNotEmpty.test(expressions)) {
                 dfp.addExpressionsFromStringList(expressions);
-            } else if (this.dataModes == DataModes.sampleProvider) {
+            } else if (this.dataModes == DataModes.sampleProvider1) {
                 String providerName = "*";
-
+                // TODO process more than 1 providerName 
                 if (isNotEmpty.test(expressions)) {
                     providerName = expressions.get(0);
                 }
@@ -133,6 +133,7 @@ public class DatafakerCli implements Callable<Integer> {
                 dfp.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList(faker, providerName));
             } else if (this.dataModes == DataModes.sampleProvider2) {
                 String providerName = "*";
+                // TODO process more than 1 providerName 
                 if (isNotEmpty.test(expressions)) {
                     providerName = expressions.get(0);
                 }
