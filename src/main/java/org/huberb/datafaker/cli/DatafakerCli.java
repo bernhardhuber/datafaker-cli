@@ -17,7 +17,6 @@ package org.huberb.datafaker.cli;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +28,6 @@ import net.datafaker.Faker;
 import net.datafaker.providers.base.AbstractProvider;
 import org.huberb.datafaker.cli.Adapters.FakerFactory;
 import org.huberb.datafaker.cli.Adapters.Locales;
-import org.huberb.datafaker.cli.DataFormatProcessor.ExpressionInternal;
 import org.reflections.Reflections;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
@@ -94,24 +92,23 @@ public class DatafakerCli implements Callable<Integer> {
         if (availableModes != null) {
             handleAvailableModes(availableModes);
         } else {
-            // init
+            // step 0: init
             final Faker faker = createTheFaker();
             final DataFormatProcessor dfp = new DataFormatProcessor(faker);
 
-            // data
-            List<ExpressionInternal> expressionInternalList = Collections.emptyList();
+            // step 1: data
             if (this.dataModes == DataModes.sample) {
                 SamplesGenerator samplesGenerator = new SamplesGenerator();
-                expressionInternalList = samplesGenerator.sampleExpressions(faker);
-                dfp.addExpressionsFromExpressionInternalList(expressionInternalList);
+                dfp.addExpressionsFromExpressionInternalList(samplesGenerator.sampleExpressions(faker));
             } else if (this.dataModes == DataModes.expression && expressions != null && !expressions.isEmpty()) {
                 dfp.addExpressionsFromStringList(expressions);
             } else {
-                List<String> expressions = Arrays.asList("fullName: #{Name.fullName}", "fullAddress: #{Address.fullAddress}");
-                dfp.addExpressionsFromStringList(expressions);
+                dfp.addExpressionsFromStringList(Arrays.asList(
+                        "fullName: #{Name.fullName}",
+                        "fullAddress: #{Address.fullAddress}"));
             }
-            // format
             System_out_format("expression: %s%n", dfp.textRepresentation());
+            // step 2: format
             String result = dfp.format(formatEnum);
             System_out_format("result%n%s%n", result);
         }
