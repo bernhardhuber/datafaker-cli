@@ -173,7 +173,6 @@ public class DatafakerCli implements Callable<Integer> {
 
     /**
      * Query for classes, or methods extending {@link AbstractProvider}.
-     *
      */
     static class ProvidersQueries {
 
