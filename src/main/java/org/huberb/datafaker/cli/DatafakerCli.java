@@ -50,19 +50,6 @@ public class DatafakerCli implements Callable<Integer> {
             required = false,
             description = "language-tag in format {language}_{country}.")
     private String languageTag;
-    @Option(names = {"-c", "--count"},
-            required = false,
-            defaultValue = "3",
-            description = "count of results.")
-    private int countOfResults;
-
-    @Option(names = {"--expression"},
-            required = false,
-            description = "TODO describe me.")
-    private boolean expressionOption;
-
-    @Parameters(index = "0..*", description = "expression arguments.")
-    private List<String> expressions;
 
     enum AvailableModes {
         locales, providers, providerMethods1, providerMethods2
@@ -70,11 +57,25 @@ public class DatafakerCli implements Callable<Integer> {
     @Option(names = {"--available"}, description = "Valid values: ${COMPLETION-CANDIDATES}")
     AvailableModes availableModes;
 
-    enum SampleModes {
-        expression, csv, json, sql, providers
+    @Option(names = {"-c", "--count"},
+            required = false,
+            defaultValue = "3",
+            description = "count of results.")
+    private int countOfResults;
+
+    enum DataModes {
+        expression, sample
     }
-    @Option(names = {"--samples"}, description = "Valid values: ${COMPLETION-CANDIDATES}")
-    SampleModes sampleModes;
+    @Option(names = {"--expression"},
+            required = false,
+            description = "Valid values: ${COMPLETION-CANDIDATES}")
+    private DataModes dataModes;
+
+    @Parameters(index = "0..*", description = "expression arguments.")
+    private List<String> expressions;
+
+    @Option(names = {"--formats"}, description = "Valid values: ${COMPLETION-CANDIDATES}")
+    DataFormatProcessor.FormatEnum formatEnum;
 
     public static void main(String[] args) {
         final int exitCode = new CommandLine(new DatafakerCli()).execute(args);
@@ -90,19 +91,16 @@ public class DatafakerCli implements Callable<Integer> {
 
         if (availableModes != null) {
             handleAvailableModes(availableModes);
-        } else if (sampleModes != null) {
-            handleSampleModes(sampleModes);
         } else {
             String expression = "fullName: #{Name.fullName}, fullAddress: #{Address.fullAddress}";
-            if (expressionOption && expressions != null && !expressions.isEmpty()) {
+            if (expressions != null && !expressions.isEmpty()) {
                 expression = expressions.get(0);
             }
             System_out_format("expression: %s%n", expression);
             Faker faker = createTheFaker();
-            for (int i = 0; i < countOfResults; i++) {
-                String result = faker.expression(expression);
-                System_out_format("%d result: %s%n", i, result);
-            }
+            DataFormatProcessor dfp = new DataFormatProcessor(faker);
+            String result = dfp.expressions(Arrays.asList(expression)).format(formatEnum);
+            System_out_format("result%n%s%n", result);
         }
         return 0;
     }
@@ -147,27 +145,6 @@ public class DatafakerCli implements Callable<Integer> {
                                 method.getParameterCount()
                         ));
                     });
-        }
-    }
-
-    private void handleSampleModes(SampleModes sampleModes) {
-        SamplesGenerator samplesGenerator = new SamplesGenerator();
-        Faker faker = createTheFaker();
-        if (sampleModes == SampleModes.expression) {
-            String sampleResult = samplesGenerator.sampleExpression(faker);
-            System_out_format("sample expression%n%s%n", sampleResult);
-        } else if (sampleModes == SampleModes.csv) {
-            String sampleResult = samplesGenerator.sampleCsv(faker, this.countOfResults);
-            System_out_format("sample csv%n%s%n", sampleResult);
-        } else if (sampleModes == SampleModes.json) {
-            String sampleResult = samplesGenerator.sampleJson(faker, this.countOfResults);
-            System_out_format("sample json%n%s%n", sampleResult);
-        } else if (sampleModes == SampleModes.sql) {
-            String sampleResult = samplesGenerator.sampleSql(faker, this.countOfResults);
-            System_out_format("sample sql%n%s%n", sampleResult);
-        } else if (sampleModes == SampleModes.providers) {
-            String sampleProviders = samplesGenerator.sampleProviders2(faker);
-            System_out_format("sample providers%n%s%n", sampleProviders);
         }
     }
 

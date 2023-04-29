@@ -29,6 +29,7 @@ import net.datafaker.transformations.JsonTransformer;
 import net.datafaker.transformations.Schema;
 import net.datafaker.transformations.sql.SqlDialect;
 import net.datafaker.transformations.sql.SqlTransformer;
+import org.huberb.datafaker.cli.DataFormatProcessor.ExpressionInternal;
 import org.huberb.datafaker.cli.DatafakerCli.ProvidersQueries;
 
 /**
@@ -36,6 +37,14 @@ import org.huberb.datafaker.cli.DatafakerCli.ProvidersQueries;
  * @author berni3
  */
 class SamplesGenerator {
+
+    public List<ExpressionInternal> sampleExpressions(Faker faker) {
+        List<ExpressionInternal> result = Arrays.asList(
+                new ExpressionInternal("name", () -> faker.name().fullName()),
+                new ExpressionInternal("address", () -> faker.address().fullAddress())
+        );
+        return result;
+    }
 
     String sampleExpression(Faker faker) {
         String singleExpression = "#{Name.fullName}; #{Address.fullAddress}";
