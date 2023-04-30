@@ -192,9 +192,9 @@ public class DatafakerCli implements Callable<Integer> {
     }
 
     Faker createTheFaker() {
-        final String theLanguageTag = Optional.ofNullable(this.languageTag).orElse(Locales.defaultLocale().get().toLanguageTag());
-        Faker faker = FakerFactory.createFakerFromLocale(theLanguageTag);
-        return faker;
+        final String theLanguageTag = Optional.ofNullable(this.languageTag)
+                .orElse(Locales.defaultLocale().get().toLanguageTag());
+        return FakerFactory.createFakerFromLocale(theLanguageTag);
     }
 
     private void System_out_format(String format, Object... args) {
