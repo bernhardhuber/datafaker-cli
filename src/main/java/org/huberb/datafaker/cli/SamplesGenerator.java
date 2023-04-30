@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import net.datafaker.Faker;
 import net.datafaker.providers.base.AbstractProvider;
 import org.huberb.datafaker.cli.DataFormatProcessor.ExpressionInternal;
-import org.huberb.datafaker.cli.DatafakerCli.ProvidersQueries;
+import org.huberb.datafaker.cli.ProvidersQueries;
 
 /**
  *
@@ -88,7 +88,7 @@ class SamplesGenerator {
             return result;
         };
         // Retrieve provider methods
-        final List<Method> methodList = new ProvidersQueries().findAllMathodsClassesExtendingAbstractProvider().stream()
+        final List<Method> methodList = new ProvidersQueries().findAllMethodsClassesExtendingAbstractProvider().stream()
                 .filter(methodProviderPredicate)
                 .filter(methodSignaturePredicate)
                 .sorted((m1, m2) -> m1.getClass().getName().compareTo(m2.getClass().getName()))
@@ -145,7 +145,7 @@ class SamplesGenerator {
         };
 
         // Retrieve provider methods
-        final List<Method> methodList = new ProvidersQueries().findAllMathodsClassesExtendingAbstractProvider().stream()
+        final List<Method> methodList = new ProvidersQueries().findAllMethodsClassesExtendingAbstractProvider().stream()
                 .filter(methodProviderPredicate)
                 .filter(methodSignaturePredicate)
                 .sorted((m1, m2) -> m1.getClass().getName().compareTo(m2.getClass().getName()))
@@ -182,7 +182,7 @@ class SamplesGenerator {
             result = result && m.getReturnType().equals(String.class);
             return result;
         };
-        List<Method> methodList = new ProvidersQueries().findAllMathodsClassesExtendingAbstractProvider().stream()
+        List<Method> methodList = new ProvidersQueries().findAllMethodsClassesExtendingAbstractProvider().stream()
                 .filter(p)
                 .sorted((m1, m2) -> m1.getClass().getName().compareTo(m2.getClass().getName()))
                 .collect(Collectors.toList());
