@@ -169,7 +169,7 @@ public class DatafakerCli implements Callable<Integer> {
                 providerName = expressions.get(0);
             }
             SamplesGenerator sampleGenerator = new SamplesGenerator();
-            dfp.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList(faker, providerName));
+            dfp.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList1(faker, providerName));
         } else if (this.dataModes == DataModes.sampleProvider2) {
             String providerName = "*";
             // TODO process more than 1 providerName 
