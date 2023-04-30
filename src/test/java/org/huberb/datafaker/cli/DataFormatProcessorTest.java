@@ -17,7 +17,9 @@ package org.huberb.datafaker.cli;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.function.Function;
 import net.datafaker.Faker;
+import org.huberb.datafaker.cli.DataFormatProcessor.ExpressionInternal;
 import org.huberb.datafaker.cli.DataFormatProcessor.FormatEnum;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,18 +36,46 @@ public class DataFormatProcessorTest {
 
     @BeforeAll
     static void setUpAll() {
-        faker = Adapters.FakerFactory.createFakerFromLocale(Locale.getDefault());
+        faker = Adapters.FakerFactory.createFakerFromLocale(Locale.ENGLISH);
     }
     DataFormatProcessor instance;
 
+    Function<String, String> stripNewLineChars = (String s) -> {
+        return s.replaceAll("[\r\n]", " ")
+                .replaceAll("\\s{2,}", " ");
+    };
+
     /**
-     * Test of expressions method, of class DataFormatProcessor.
+     * Test of addExpressionsFromStringList method, of class
+     * DataFormatProcessor.
      */
     @Test
-    public void testExpressions() {
+    public void testAddExpressionsFromStringList() {
         instance = new DataFormatProcessor(faker);
-        instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
+        instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName}", "#{Address.fullAddress}"));
         assertEquals(2, instance.getCountOfExpressions());
+        assertEquals(stripNewLineChars.apply("locale: en\n"
+                + "fieldname fullName\n"
+                + "fieldname fullAddress\n")
+                + "", stripNewLineChars.apply(instance.textRepresentation()));
+    }
+
+    /**
+     * Test of addExpressionsFromStringList method, of class
+     * DataFormatProcessor.
+     */
+    @Test
+    public void testAddExpressionsFromExpressionInternalList() {
+        instance = new DataFormatProcessor(faker);
+        instance.addExpressionsFromExpressionInternalList(Arrays.asList(
+                new ExpressionInternal("fullName", () -> faker.name().fullName()),
+                new ExpressionInternal("fullAddress", () -> faker.address().fullAddress())
+        ));
+        assertEquals(2, instance.getCountOfExpressions());
+        assertEquals(stripNewLineChars.apply("locale: en\n"
+                + "fieldname fullName\n"
+                + "fieldname fullAddress\n")
+                + "", stripNewLineChars.apply(instance.textRepresentation()));
     }
 
     /**
