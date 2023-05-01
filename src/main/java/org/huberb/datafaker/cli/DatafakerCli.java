@@ -61,7 +61,8 @@ public class DatafakerCli implements Callable<Integer> {
     }
 
     @Spec
-    CommandSpec spec;
+    private CommandSpec spec;
+
     @Option(names = {"-l", "--locale"},
             required = false,
             description = "language-tag in format {language}[-{country}]."
@@ -85,7 +86,7 @@ public class DatafakerCli implements Callable<Integer> {
     )
     private DataModes dataModes;
 
-    @Option(names = {"-f", "--formats"},
+    @Option(names = {"-f", "--format"},
             defaultValue = "csv",
             description = "Valid values: ${COMPLETION-CANDIDATES}.")
     private DataFormatProcessor.FormatEnum formatEnum;
@@ -170,17 +171,8 @@ public class DatafakerCli implements Callable<Integer> {
             dfp.addExpressionsFromExpressionInternalList(samplesGenerator.sampleExpressions(faker));
         } else if (this.dataModes == DataModes.expression && isNotEmpty.test(expressions)) {
             dfp.addExpressionsFromStringList(expressions);
-        } else if (this.dataModes == DataModes.sampleProvider1) {
-            String providerName = "*";
-            // TODO process more than 1 providerName 
-            if (isNotEmpty.test(expressions)) {
-                providerName = expressions.get(0);
-            }
-            SamplesGenerator sampleGenerator = new SamplesGenerator();
-            dfp.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList1(faker, providerName));
-        } else if (this.dataModes == DataModes.sampleProvider2) {
+        } else if (this.dataModes == DataModes.sampleProvider) {
             List<String> providerNames = Collections.emptyList();
-            // TODO process more than 1 providerName 
             if (isNotEmpty.test(expressions)) {
                 providerNames = new ArrayList<>();
                 providerNames.addAll(expressions);
@@ -216,7 +208,7 @@ public class DatafakerCli implements Callable<Integer> {
     }
 
     enum DataModes {
-        expression, sample, sampleProvider1, sampleProvider2
+        expression, sample, sampleProvider
     }
 
 }
