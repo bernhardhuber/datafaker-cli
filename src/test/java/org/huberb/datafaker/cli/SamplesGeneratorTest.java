@@ -73,26 +73,6 @@ public class SamplesGeneratorTest {
     }
 
     /**
-     * Test of sampleProviders method, of class SamplesGenerator.
-     */
-    @Test
-    public void test_sampleProviderAsExpressionInternalList1() {
-        /*
-        Sample
-         */
-        List<ExpressionInternal> result = instance.sampleProviderAsExpressionInternalList1(faker, "*");
-        List<String> fieldNames = result.stream().map(ei -> ei.fieldname).collect(Collectors.toList());
-        String m = "" + result;
-        Assertions.assertAll(
-                () -> assertNotNull(result),
-                //() -> assertEquals("", result),
-                () -> assertFalse(result.isEmpty(), m),
-                () -> assertTrue(fieldNames.contains("Name-fullName"), m),
-                () -> assertTrue(fieldNames.contains("Address-fullAddress"), m)
-        );
-    }
-
-    /**
      * Test of sampleProviders2 method, of class SamplesGenerator.
      */
     @Test

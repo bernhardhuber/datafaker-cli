@@ -86,63 +86,6 @@ class SamplesGenerator {
      * Return a list of faker sample data
      *
      * @param faker
-     * @param providerName optional provider name, restricting data to this
-     * provider. If null, or '*' return sample-data for all available providers.
-     * @return
-     */
-    public List<ExpressionInternal> sampleProviderAsExpressionInternalList1(Faker faker, String providerName) {
-
-        final String normalizedProviderName = normalizeProviderName.apply(providerName);
-        final List<ExpressionInternal> resultExpressionInternal = new ArrayList<>();
-
-        final Predicate<Method> methodProviderPredicate = (Method m) -> {
-            boolean result = true;
-            if (normalizedProviderName != null) {
-                result = result && m.getParameterCount() == 0;
-                result = result && m.getDeclaringClass().getSimpleName().equals(normalizedProviderName);
-            } else {
-                result = true;
-            }
-            return result;
-        };
-        final Predicate<Method> methodSignaturePredicate = (Method m) -> {
-            boolean result = true;
-            result = result && m.getParameterCount() == 0;
-            result = result && m.getReturnType().equals(String.class);
-            return result;
-        };
-        // Retrieve provider methods
-        final List<Method> methodList = new ProvidersQueries().findAllMethodsClassesExtendingAbstractProvider().stream()
-                .filter(methodProviderPredicate)
-                .filter(methodSignaturePredicate)
-                .sorted(comparatorMethodByName)
-                .collect(Collectors.toList());
-
-        for (Method m : methodList) {
-
-            String mClass = m.getDeclaringClass().getSimpleName();
-            String mName = m.getName();
-            String expression = String.format("#{%s.%s}", mClass, mName);
-
-            String fieldName = String.format("%s-%s", mClass, mName);
-            Supplier<String> supp = () -> {
-                try {
-                    return faker.expression(expression);
-                } catch (Exception ex) {
-                    return "";
-                }
-            };
-            ExpressionInternal ei = new ExpressionInternal(fieldName, supp);
-            resultExpressionInternal.add(ei);
-
-        }
-        return resultExpressionInternal;
-    }
-
-    /**
-     * Return a list of faker sample data
-     *
-     * @param faker
      * @param providerNames optional provider name, restricting data to this
      * provider. If null, or '*' return sample-data for all available providers.
      * @return
