@@ -27,6 +27,7 @@ import net.datafaker.Faker;
 import org.huberb.datafaker.cli.DataFormatProcessor.ExpressionInternal;
 
 /**
+ * Provide some datafaker sample data.
  *
  * @author berni3
  */
@@ -36,7 +37,8 @@ class SamplesGenerator {
      * Generate name, and address expressions.
      *
      * @param faker
-     * @return
+     * @return list of {@link ExpressionInternal} elements, describing a
+     * faker-expression.
      */
     public List<ExpressionInternal> sampleExpressions(Faker faker) {
         List<ExpressionInternal> result = Arrays.asList(
@@ -49,12 +51,21 @@ class SamplesGenerator {
     /**
      * Generate name, and address expressions.
      *
-     * @return
+     * @return list of faker-expressions
+     * @see Faker#expression(java.lang.String)
      */
     public List< String> sampleExpressions() {
         return Arrays.asList("#{Name.fullName}", "#{Address.fullAddress}");
     }
 
+    /**
+     * Return a list of faker sample data
+     *
+     * @param faker
+     * @param providerName optional provider name, restricting data to this
+     * provider. If null, or '*' return sample-data for all available providers.
+     * @return
+     */
     public List<ExpressionInternal> sampleProviderAsExpressionInternalList1(Faker faker, String providerName) {
         Function<String, String> normalizeProviderName = (s) -> {
             if (s == null) {
@@ -112,6 +123,14 @@ class SamplesGenerator {
         return resultExpressionInternal;
     }
 
+    /**
+     * Return a list of faker sample data
+     *
+     * @param faker
+     * @param providerName optional provider name, restricting data to this
+     * provider. If null, or '*' return sample-data for all available providers.
+     * @return
+     */
     public List<ExpressionInternal> sampleProviderAsExpressionInternalList2(Faker faker, String providerName) {
         Function<String, String> normalizeProviderName = (s) -> {
             if (s == null) {

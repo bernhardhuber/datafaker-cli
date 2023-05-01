@@ -28,10 +28,19 @@ import net.datafaker.transformations.JsonTransformer;
 import net.datafaker.transformations.JsonTransformer.JsonTransformerBuilder.FormattedAs;
 import net.datafaker.transformations.Schema;
 import net.datafaker.transformations.SimpleField;
+import net.datafaker.transformations.XmlTransformer;
+import net.datafaker.transformations.XmlTransformer.XmlTransformerBuilder;
+import net.datafaker.transformations.YamlTransformer;
 import net.datafaker.transformations.sql.SqlDialect;
 import net.datafaker.transformations.sql.SqlTransformer;
 
 /**
+ * Processor accepting some data, and formats it.
+ * <p>
+ * Data may be provided as faker expression, or as pair of fieldname, and string
+ * supplier.
+ * <p>
+ * Supported formats see {@link FormatEnum}.
  *
  * @author berni3
  */
@@ -65,12 +74,29 @@ public class DataFormatProcessor {
         this.limit = limit;
     }
 
+    /**
+     * Add a data-expression.
+     * <p>
+     * Data is represented by a {@link ExpressionInternal} instance.
+     *
+     * @param expressions
+     * @return
+     */
     public DataFormatProcessor addExpressionsFromExpressionInternalList(List<ExpressionInternal> expressions) {
         expressionInternalList.clear();
         expressionInternalList.addAll(expressions);
         return this;
     }
 
+    /**
+     * Add a data-expression.
+     * <p>
+     * Data is represented by a faker expression.
+     *
+     * @param expressions
+     * @return
+     * @see Faker#expression(java.lang.String)
+     */
     public DataFormatProcessor addExpressionsFromStringList(List<String> expressions) {
         for (String expression : expressions) {
             String fieldname = extractFieldname.apply(expression);
@@ -93,6 +119,13 @@ public class DataFormatProcessor {
         return sb.toString();
     }
 
+    /**
+     * Format data for a given format type.
+     *
+     * @param fe represents the format type
+     * @return
+     * @see FormatEnum
+     */
     public String format(FormatEnum fe) {
         if (fe == FormatEnum.txt) {
             return formatTxt();
@@ -104,11 +137,16 @@ public class DataFormatProcessor {
             return formatJson();
         } else if (fe == FormatEnum.sql) {
             return formatSql();
+        } else if (fe == FormatEnum.xml) {
+            return formatXml();
+        } else if (fe == FormatEnum.yaml) {
+            return formatYaml();
         } else {
             throw new RuntimeException(String.format("Unsupported format %s", fe));
         }
     }
 
+    //-------------------------------------------------------------------------
     protected String formatTxt() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < limit; i++) {
@@ -176,6 +214,38 @@ public class DataFormatProcessor {
         return result;
     }
 
+    protected String formatXml() {
+        List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
+                .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
+                .collect(Collectors.toList());
+        Schema<Object, String> schema = Schema.of(simpleFields.toArray(new SimpleField[0]));
+        XmlTransformer transformer = new XmlTransformerBuilder<String>()
+                .build();
+
+        CharSequence result = transformer.generate(schema, limit);
+        StringBuilder sb = new StringBuilder();
+        sb.append("<root>")
+                .append(System.lineSeparator())
+                .append(result)
+                .append(System.lineSeparator())
+                .append("</root>");
+        return sb.toString();
+    }
+
+    protected String formatYaml() {
+        List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
+                .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
+                .collect(Collectors.toList());
+        Schema<Object, String> schema = Schema.of(simpleFields.toArray(new SimpleField[0]));
+        YamlTransformer transformer = new YamlTransformer<String>();
+
+        String result = transformer.generate(schema, limit);
+        return result;
+    }
+
+    /**
+     * Internal wrapper representing a fieldname, and its faker-value.
+     */
     public static class ExpressionInternal {
 
         final String fieldname;
@@ -219,7 +289,10 @@ public class DataFormatProcessor {
 
     }
 
+    /**
+     * Enumeration of supported formats
+     */
     public enum FormatEnum {
-        txt, csv, tsv, json, sql, html, pdf
+        txt, csv, tsv, json, sql, xml, yaml
     }
 }

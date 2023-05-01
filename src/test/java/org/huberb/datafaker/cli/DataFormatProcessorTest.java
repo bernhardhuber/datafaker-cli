@@ -137,6 +137,28 @@ public class DataFormatProcessorTest {
      * Test of format method, of class DataFormatProcessor.
      */
     @Test
+    public void testFormatXml() {
+        instance = new DataFormatProcessor(faker);
+        instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
+        String result5 = instance.formatXml();
+        assertTrue(!result5.isBlank(), "" + result5);
+    }
+
+    /**
+     * Test of format method, of class DataFormatProcessor.
+     */
+    @Test
+    public void testFormatYaml() {
+        instance = new DataFormatProcessor(faker);
+        instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
+        String result5 = instance.formatYaml();
+        assertTrue(!result5.isBlank(), "" + result5);
+    }
+
+    /**
+     * Test of format method, of class DataFormatProcessor.
+     */
+    @Test
     public void testFormat() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
@@ -159,6 +181,14 @@ public class DataFormatProcessorTest {
         {
             String result4 = instance.format(FormatEnum.sql);
             assertTrue(!result4.isBlank(), "" + result4);
+        }
+        {
+            String result5 = instance.format(FormatEnum.xml);
+            assertTrue(!result5.isBlank(), "" + result5);
+        }
+        {
+            String result6 = instance.format(FormatEnum.yaml);
+            assertTrue(!result6.isBlank(), "" + result6);
         }
     }
 
