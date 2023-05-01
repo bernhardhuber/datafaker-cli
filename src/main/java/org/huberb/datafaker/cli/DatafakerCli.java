@@ -86,12 +86,23 @@ public class DatafakerCli implements Callable<Integer> {
     private List<String> expressions;
 
     //-------------------------------------------------------------------------
+    /**
+     * Command line entry point.
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         final int exitCode = new CommandLine(new DatafakerCli()).execute(args);
         System.exit(exitCode);
     }
 
     //-------------------------------------------------------------------------
+    /**
+     * Entry point running this application.
+     *
+     * @return
+     * @throws Exception
+     */
     @Override
     public Integer call() throws Exception {
         System_out_format("Hello %s%n", this.getClass().getName());

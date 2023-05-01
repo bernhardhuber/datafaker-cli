@@ -37,14 +37,16 @@ import net.datafaker.transformations.sql.SqlTransformer;
 /**
  * Processor accepting some data, and formats it.
  * <p>
- * Data may be provided as faker expression, or as pair of fieldname, and string
- * supplier.
+ * Data may be provided as faker expression, or as pair of field name, and
+ * string supplier.
  * <p>
  * Supported formats see {@link FormatEnum}.
  *
  * @author berni3
  */
 public class DataFormatProcessor {
+
+    private static final int LIMIT_DEFAULT_VALUE = 3;
 
     private final Faker faker;
     private final List<ExpressionInternal> expressionInternalList;
@@ -61,15 +63,29 @@ public class DataFormatProcessor {
         return result;
     };
 
+    /**
+     * Create new instance.
+     * <p>
+     * Use limit default value 3.
+     *
+     * @param faker instance
+     */
     public DataFormatProcessor(Faker faker) {
-        this(faker, 3);
+        this(faker, LIMIT_DEFAULT_VALUE);
     }
 
+    /**
+     * Create new instance
+     *
+     * @param faker instance
+     * @param limit number of data records created. If limit is less than 1 use
+     * default value 3.
+     */
     public DataFormatProcessor(Faker faker, int limit) {
         this.faker = faker;
         this.expressionInternalList = new ArrayList<>();
         if (limit <= 0) {
-            limit = 3;
+            limit = LIMIT_DEFAULT_VALUE;
         }
         this.limit = limit;
     }
@@ -106,10 +122,20 @@ public class DataFormatProcessor {
         return this;
     }
 
+    /**
+     * Return number of expressions added.
+     *
+     * @return
+     */
     public int getCountOfExpressions() {
         return this.expressionInternalList.size();
     }
 
+    /**
+     * Return a text representation of this instance.
+     *
+     * @return
+     */
     public String textRepresentation() {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("locale: %s%n", faker.getContext().getLocale()));
@@ -194,7 +220,6 @@ public class DataFormatProcessor {
         JsonTransformer transformer = JsonTransformer.<String>builder()
                 .formattedAs(FormattedAs.JSON_ARRAY)
                 .build();
-        int limit = 5;
         String result = transformer.generate(schema, limit);
         return result;
     }
@@ -244,7 +269,7 @@ public class DataFormatProcessor {
     }
 
     /**
-     * Internal wrapper representing a fieldname, and its faker-value.
+     * Internal wrapper representing a field name, and its faker-value.
      */
     public static class ExpressionInternal {
 
@@ -258,7 +283,7 @@ public class DataFormatProcessor {
 
         @Override
         public int hashCode() {
-            int hash = 3;
+            int hash = LIMIT_DEFAULT_VALUE;
             hash = 59 * hash + Objects.hashCode(this.fieldname);
             hash = 59 * hash + Objects.hashCode(this.expressionSupplier);
             return hash;

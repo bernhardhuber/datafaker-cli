@@ -15,6 +15,7 @@
  */
 package org.huberb.datafaker.samples;
 
+import net.datafaker.Faker;
 import net.datafaker.providers.base.AbstractProvider;
 import net.datafaker.providers.base.BaseProviders;
 
@@ -26,12 +27,23 @@ public class Icd3Diseases extends AbstractProvider<BaseProviders> {
 
     private Icd3CodesDiseasesData icd3CodesDiseases;
 
+    /**
+     * Create a new instance.
+     *
+     * @param faker
+     * @see Faker
+     */
     public Icd3Diseases(BaseProviders faker) {
         super(faker);
         icd3CodesDiseases = new Icd3CodesDiseasesData();
     }
 
     //----
+    /**
+     * Return an icd format having length 3.
+     *
+     * @return
+     */
     public String icdCode() {
         String[] icd3Codes = icd3CodesDiseases.icd3Codes();
         final int l = icd3Codes.length;
@@ -40,6 +52,11 @@ public class Icd3Diseases extends AbstractProvider<BaseProviders> {
         return key;
     }
 
+    /**
+     * Return a disease name.
+     *
+     * @return
+     */
     public String disease() {
         String[] diseases = icd3CodesDiseases.diseases();
         final int l = diseases.length;
