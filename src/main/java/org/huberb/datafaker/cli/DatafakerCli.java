@@ -16,11 +16,15 @@
 package org.huberb.datafaker.cli;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.datafaker.Faker;
 import org.huberb.datafaker.cli.Adapters.FakerFactory;
@@ -32,6 +36,7 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 
 /**
+ * A command line program for {@link Faker}.
  *
  * @author berni3
  */
@@ -154,7 +159,45 @@ public class DatafakerCli implements Callable<Integer> {
             }
             return i;
         };
+        Predicate<List<String>> isNotEmpty = l -> l != null && !l.isEmpty();
 
+        final DataFormatProcessor dfp = new DataFormatProcessor(faker,
+                normalizeCountOfResults.apply(this.countOfResults));
+
+        // step 1: data
+        if (this.dataModes == DataModes.sample) {
+            SamplesGenerator samplesGenerator = new SamplesGenerator();
+            dfp.addExpressionsFromExpressionInternalList(samplesGenerator.sampleExpressions(faker));
+        } else if (this.dataModes == DataModes.expression && isNotEmpty.test(expressions)) {
+            dfp.addExpressionsFromStringList(expressions);
+        } else if (this.dataModes == DataModes.sampleProvider1) {
+            String providerName = "*";
+            // TODO process more than 1 providerName 
+            if (isNotEmpty.test(expressions)) {
+                providerName = expressions.get(0);
+            }
+            SamplesGenerator sampleGenerator = new SamplesGenerator();
+            dfp.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList1(faker, providerName));
+        } else if (this.dataModes == DataModes.sampleProvider2) {
+            List<String> providerNames = Collections.emptyList();
+            // TODO process more than 1 providerName 
+            if (isNotEmpty.test(expressions)) {
+                providerNames = new ArrayList<>();
+                providerNames.addAll(expressions);
+            }
+            SamplesGenerator sampleGenerator = new SamplesGenerator();
+            dfp.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList2(faker, providerNames));
+        }
+
+        if (dfp.getCountOfExpressions() == 0) {
+            dfp.addExpressionsFromStringList(Arrays.asList(
+                    "#{Name.fullName}",
+                    "#{Address.fullAddress}"));
+        }
+        System_out_format("expression: %s%n", dfp.textRepresentation());
+        // step 2: format
+        String result = dfp.format(formatEnum);
+        System_out_format("result%n%s%n", result);
     }
 
     Faker createTheFaker() {

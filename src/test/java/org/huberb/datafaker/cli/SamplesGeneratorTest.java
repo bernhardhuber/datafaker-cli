@@ -15,6 +15,7 @@
  */
 package org.huberb.datafaker.cli;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -96,10 +97,8 @@ public class SamplesGeneratorTest {
      */
     @Test
     public void test_sampleProviderAsExpressionInternalList2() {
-        /*
-        Sample
-         */
-        List<ExpressionInternal> result = instance.sampleProviderAsExpressionInternalList2(faker, "*");
+        List<String> providerNames = Collections.emptyList();
+        List<ExpressionInternal> result = instance.sampleProviderAsExpressionInternalList2(faker, providerNames);
         List<String> fieldNames = result.stream().map(ei -> ei.fieldname).collect(Collectors.toList());
         String m = "" + result;
         Assertions.assertAll(

@@ -18,6 +18,7 @@ package org.huberb.datafaker.cli;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
@@ -42,6 +43,15 @@ class SamplesGenerator {
         } else {
             return s;
         }
+    };
+    final Function<List<String>, List<String>> normalizeProviderNames = (l) -> {
+        boolean allProviders = l.stream()
+                .map(s -> s.trim())
+                .anyMatch(s -> "*".equals(s) || "".equals(s));
+        if (allProviders) {
+            return Collections.emptyList();
+        }
+        return l.stream().map(s -> s.trim()).collect(Collectors.toList());
     };
     final Comparator<Method> comparatorMethodByName = (Method m1, Method m2) -> {
         return m1.getClass().getName().compareTo(m2.getClass().getName());
@@ -133,20 +143,20 @@ class SamplesGenerator {
      * Return a list of faker sample data
      *
      * @param faker
-     * @param providerName optional provider name, restricting data to this
+     * @param providerNames optional provider name, restricting data to this
      * provider. If null, or '*' return sample-data for all available providers.
      * @return
      */
-    public List<ExpressionInternal> sampleProviderAsExpressionInternalList2(Faker faker, String providerName) {
+    public List<ExpressionInternal> sampleProviderAsExpressionInternalList2(Faker faker, List<String> providerNames) {
 
-        final String normalizedProviderName = normalizeProviderName.apply(providerName);
+        final List<String> normalizedProviderNames = normalizeProviderNames.apply(providerNames);
         final List<ExpressionInternal> resultExpressionInternal = new ArrayList<>();
 
         final Predicate<Method> methodProviderPredicate = (m) -> {
             boolean result = true;
-            if (normalizedProviderName != null) {
+            if (!normalizedProviderNames.isEmpty()) {
                 result = result && m.getParameterCount() == 0;
-                result = result && m.getDeclaringClass().getSimpleName().equals(normalizedProviderName);
+                result = result && normalizedProviderNames.contains(m.getDeclaringClass().getSimpleName());
             } else {
                 result = true;
             }
@@ -171,7 +181,6 @@ class SamplesGenerator {
             String mClass = m.getDeclaringClass().getSimpleName();
             String mName = m.getName();
             String expression = String.format("#{%s.%s}", mClass, mName);
-
             String fieldName = String.format("%s-%s", mClass, mName);
             Supplier<String> supp = () -> {
                 try {
