@@ -57,7 +57,7 @@ public class DatafakerCli implements Callable<Integer> {
     enum AvailableModes {
         locales, providers, providerMethods1, providerMethods2
     }
-    @Option(names = {"--available"},
+    @Option(names = {"-a", "--available"},
             description = "Valid values: ${COMPLETION-CANDIDATES}")
     private AvailableModes availableModes;
 
@@ -70,14 +70,14 @@ public class DatafakerCli implements Callable<Integer> {
     enum DataModes {
         expression, sample, sampleProvider1, sampleProvider2
     }
-    @Option(names = {"--expression"},
+    @Option(names = {"-e", "--expression"},
             required = false,
             defaultValue = "sample",
             description = "Valid values: ${COMPLETION-CANDIDATES}."
     )
     private DataModes dataModes;
 
-    @Option(names = {"--formats"},
+    @Option(names = {"-f", "--formats"},
             defaultValue = "csv",
             description = "Valid values: ${COMPLETION-CANDIDATES}.")
     private DataFormatProcessor.FormatEnum formatEnum;
