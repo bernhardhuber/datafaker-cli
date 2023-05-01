@@ -17,6 +17,7 @@ package org.huberb.datafaker.cli;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -27,17 +28,25 @@ import net.datafaker.transformations.JsonTransformer;
 import net.datafaker.transformations.JsonTransformer.JsonTransformerBuilder.FormattedAs;
 import net.datafaker.transformations.Schema;
 import net.datafaker.transformations.SimpleField;
+import net.datafaker.transformations.XmlTransformer;
+import net.datafaker.transformations.XmlTransformer.XmlTransformerBuilder;
+import net.datafaker.transformations.YamlTransformer;
 import net.datafaker.transformations.sql.SqlDialect;
 import net.datafaker.transformations.sql.SqlTransformer;
 
 /**
+ * Processor accepting some data, and formats it.
+ * <p>
+ * Data may be provided as faker expression, or as pair of fieldname, and string
+ * supplier.
+ * <p>
+ * Supported formats see {@link FormatEnum}.
  *
  * @author berni3
  */
 public class DataFormatProcessor {
 
     private final Faker faker;
-
     private final List<ExpressionInternal> expressionInternalList;
     private final int limit;
 
@@ -65,12 +74,29 @@ public class DataFormatProcessor {
         this.limit = limit;
     }
 
+    /**
+     * Add a data-expression.
+     * <p>
+     * Data is represented by a {@link ExpressionInternal} instance.
+     *
+     * @param expressions
+     * @return
+     */
     public DataFormatProcessor addExpressionsFromExpressionInternalList(List<ExpressionInternal> expressions) {
         expressionInternalList.clear();
         expressionInternalList.addAll(expressions);
         return this;
     }
 
+    /**
+     * Add a data-expression.
+     * <p>
+     * Data is represented by a faker expression.
+     *
+     * @param expressions
+     * @return
+     * @see Faker#expression(java.lang.String)
+     */
     public DataFormatProcessor addExpressionsFromStringList(List<String> expressions) {
         for (String expression : expressions) {
             String fieldname = extractFieldname.apply(expression);
@@ -93,6 +119,13 @@ public class DataFormatProcessor {
         return sb.toString();
     }
 
+    /**
+     * Format data for a given format type.
+     *
+     * @param fe represents the format type
+     * @return
+     * @see FormatEnum
+     */
     public String format(FormatEnum fe) {
         if (fe == FormatEnum.txt) {
             return formatTxt();
@@ -104,18 +137,24 @@ public class DataFormatProcessor {
             return formatJson();
         } else if (fe == FormatEnum.sql) {
             return formatSql();
+        } else if (fe == FormatEnum.xml) {
+            return formatXml();
+        } else if (fe == FormatEnum.yaml) {
+            return formatYaml();
         } else {
             throw new RuntimeException(String.format("Unsupported format %s", fe));
         }
     }
 
+    //-------------------------------------------------------------------------
     protected String formatTxt() {
         StringBuilder sb = new StringBuilder();
-        expressionInternalList.forEach(ei -> {
-            sb.append(String.format("%s: %s%n", ei.fieldname, ei.expressionSupplier.get()));
-        });
+        for (int i = 0; i < limit; i++) {
+            expressionInternalList.forEach(ei -> {
+                sb.append(String.format("%s: %s%n", ei.fieldname, ei.expressionSupplier.get()));
+            });
+        }
         return sb.toString();
-
     }
 
     protected String formatCsv() {
@@ -134,10 +173,10 @@ public class DataFormatProcessor {
     }
 
     protected String formatTsv() {
-        List<SimpleField<Object, String>> l = expressionInternalList.stream()
+        List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
-        Schema<Object, String> schema = Schema.of(l.toArray(new SimpleField[0]));
+        Schema<Object, String> schema = Schema.of(simpleFields.toArray(new SimpleField[0]));
         CsvTransformer transformer = CsvTransformer.<String>builder()
                 .header(true)
                 .separator("\t")
@@ -148,10 +187,10 @@ public class DataFormatProcessor {
     }
 
     protected String formatJson() {
-        List<SimpleField<Object, String>> l = expressionInternalList.stream()
+        List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
-        Schema<Object, String> schema = Schema.of(l.toArray(new SimpleField[0]));
+        Schema<Object, String> schema = Schema.of(simpleFields.toArray(new SimpleField[0]));
         JsonTransformer transformer = JsonTransformer.<String>builder()
                 .formattedAs(FormattedAs.JSON_ARRAY)
                 .build();
@@ -161,10 +200,10 @@ public class DataFormatProcessor {
     }
 
     protected String formatSql() {
-        List<SimpleField<Object, String>> l = expressionInternalList.stream()
+        List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
-        Schema<Object, String> schema = Schema.of(l.toArray(new SimpleField[0]));
+        Schema<Object, String> schema = Schema.of(simpleFields.toArray(new SimpleField[0]));
         SqlTransformer transformer = SqlTransformer.<String>builder()
                 .batch(5)
                 .tableName("DATAFAKER_TABLE")
@@ -175,6 +214,38 @@ public class DataFormatProcessor {
         return result;
     }
 
+    protected String formatXml() {
+        List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
+                .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
+                .collect(Collectors.toList());
+        Schema<Object, String> schema = Schema.of(simpleFields.toArray(new SimpleField[0]));
+        XmlTransformer transformer = new XmlTransformerBuilder<String>()
+                .build();
+
+        CharSequence result = transformer.generate(schema, limit);
+        StringBuilder sb = new StringBuilder();
+        sb.append("<root>")
+                .append(System.lineSeparator())
+                .append(result)
+                .append(System.lineSeparator())
+                .append("</root>");
+        return sb.toString();
+    }
+
+    protected String formatYaml() {
+        List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
+                .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
+                .collect(Collectors.toList());
+        Schema<Object, String> schema = Schema.of(simpleFields.toArray(new SimpleField[0]));
+        YamlTransformer transformer = new YamlTransformer<String>();
+
+        String result = transformer.generate(schema, limit);
+        return result;
+    }
+
+    /**
+     * Internal wrapper representing a fieldname, and its faker-value.
+     */
     public static class ExpressionInternal {
 
         final String fieldname;
@@ -184,9 +255,44 @@ public class DataFormatProcessor {
             this.fieldname = fieldname;
             this.expressionSupplier = expressionSupplier;
         }
+
+        @Override
+        public int hashCode() {
+            int hash = 3;
+            hash = 59 * hash + Objects.hashCode(this.fieldname);
+            hash = 59 * hash + Objects.hashCode(this.expressionSupplier);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final ExpressionInternal other = (ExpressionInternal) obj;
+            if (!Objects.equals(this.fieldname, other.fieldname)) {
+                return false;
+            }
+            return Objects.equals(this.expressionSupplier, other.expressionSupplier);
+        }
+
+        @Override
+        public String toString() {
+            return "ExpressionInternal{" + "fieldname=" + fieldname + ", expressionSupplier=" + expressionSupplier + '}';
+        }
+
     }
 
+    /**
+     * Enumeration of supported formats
+     */
     public enum FormatEnum {
-        txt, csv, tsv, json, sql, html, pdf
+        txt, csv, tsv, json, sql, xml, yaml
     }
 }

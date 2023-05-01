@@ -32,13 +32,35 @@ public class Adapters {
     private Adapters() {
     }
 
+    /**
+     * Factory methods for creating a {@link Faker} instance.
+     */
     public static class FakerFactory {
 
+        private FakerFactory() {
+        }
+
+        /**
+         * Create faker instance from language tag.
+         * <p>
+         * A language tag has the format language[-country].
+         * <p>
+         * Examples: en, de, de-AT.
+         *
+         * @param languageTag
+         * @return a {@link Faker} instance
+         */
         public static Faker createFakerFromLocale(String languageTag) {
             Locale locale = Locale.forLanguageTag(languageTag);
             return createFakerFromLocale(locale);
         }
 
+        /**
+         * Create a faker instance for a given {@link  Locale} instance.
+         *
+         * @param locale
+         * @return a {@link Faker} instance
+         */
         public static Faker createFakerFromLocale(Locale locale) {
             return new Faker(locale);
         }
@@ -46,18 +68,39 @@ public class Adapters {
     }
 
     /**
-     * Adopting locale-api.
+     * Suppliers providing an instance of {@link Locale}.
      */
     public static class Locales {
 
+        private Locales() {
+        }
+
+        /**
+         * Return all available locales
+         *
+         * @return
+         * @see Locale#getAvailableLocales()
+         */
         public static Supplier<List<Locale>> availableLocales() {
             return () -> Arrays.asList(Locale.getAvailableLocales());
         }
 
+        /**
+         * Return current locale
+         *
+         * @return
+         * @see Locale#getDefault()
+         */
         public static Supplier<Locale> defaultLocale() {
             return () -> Locale.getDefault();
         }
 
+        /**
+         * Return string representation of {@link Locale} instance.
+         *
+         * @return
+         * @see Locale#toString()
+         */
         public static Function<Locale, String> localeToString() {
             return locale -> locale.toString();
         }
