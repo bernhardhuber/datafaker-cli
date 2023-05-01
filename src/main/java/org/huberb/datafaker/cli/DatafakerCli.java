@@ -16,13 +16,11 @@
 package org.huberb.datafaker.cli;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.datafaker.Faker;
 import org.huberb.datafaker.cli.Adapters.FakerFactory;
@@ -46,6 +44,17 @@ import picocli.CommandLine.Spec;
 )
 public class DatafakerCli implements Callable<Integer> {
 
+    //-------------------------------------------------------------------------
+    /**
+     * Command line entry point.
+     *
+     * @param args
+     */
+    public static void main(String[] args) {
+        final int exitCode = new CommandLine(new DatafakerCli()).execute(args);
+        System.exit(exitCode);
+    }
+
     @Spec
     CommandSpec spec;
     @Option(names = {"-l", "--locale"},
@@ -54,9 +63,6 @@ public class DatafakerCli implements Callable<Integer> {
             + "eg. en, de, de-AT; see also --available==locales output")
     private String languageTag;
 
-    enum AvailableModes {
-        locales, providers, providerMethods1, providerMethods2
-    }
     @Option(names = {"-a", "--available"},
             description = "Valid values: ${COMPLETION-CANDIDATES}")
     private AvailableModes availableModes;
@@ -67,9 +73,6 @@ public class DatafakerCli implements Callable<Integer> {
             description = "Count of results.")
     private int countOfResults;
 
-    enum DataModes {
-        expression, sample, sampleProvider1, sampleProvider2
-    }
     @Option(names = {"-e", "--expression"},
             required = false,
             defaultValue = "sample",
@@ -84,17 +87,6 @@ public class DatafakerCli implements Callable<Integer> {
 
     @Parameters(index = "0..*", description = "expression arguments.")
     private List<String> expressions;
-
-    //-------------------------------------------------------------------------
-    /**
-     * Command line entry point.
-     *
-     * @param args
-     */
-    public static void main(String[] args) {
-        final int exitCode = new CommandLine(new DatafakerCli()).execute(args);
-        System.exit(exitCode);
-    }
 
     //-------------------------------------------------------------------------
     /**
@@ -162,44 +154,7 @@ public class DatafakerCli implements Callable<Integer> {
             }
             return i;
         };
-        Predicate<List<String>> isNotEmpty = l -> l != null && !l.isEmpty();
 
-        final DataFormatProcessor dfp = new DataFormatProcessor(faker,
-                normalizeCountOfResults.apply(this.countOfResults));
-
-        // step 1: data
-        if (this.dataModes == DataModes.sample) {
-            SamplesGenerator samplesGenerator = new SamplesGenerator();
-            dfp.addExpressionsFromExpressionInternalList(samplesGenerator.sampleExpressions(faker));
-        } else if (this.dataModes == DataModes.expression && isNotEmpty.test(expressions)) {
-            dfp.addExpressionsFromStringList(expressions);
-        } else if (this.dataModes == DataModes.sampleProvider1) {
-            String providerName = "*";
-            // TODO process more than 1 providerName 
-            if (isNotEmpty.test(expressions)) {
-                providerName = expressions.get(0);
-            }
-            SamplesGenerator sampleGenerator = new SamplesGenerator();
-            dfp.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList1(faker, providerName));
-        } else if (this.dataModes == DataModes.sampleProvider2) {
-            String providerName = "*";
-            // TODO process more than 1 providerName 
-            if (isNotEmpty.test(expressions)) {
-                providerName = expressions.get(0);
-            }
-            SamplesGenerator sampleGenerator = new SamplesGenerator();
-            dfp.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList2(faker, providerName));
-        }
-
-        if (dfp.getCountOfExpressions() == 0) {
-            dfp.addExpressionsFromStringList(Arrays.asList(
-                    "#{Name.fullName}",
-                    "#{Address.fullAddress}"));
-        }
-        System_out_format("expression: %s%n", dfp.textRepresentation());
-        // step 2: format
-        String result = dfp.format(formatEnum);
-        System_out_format("result%n%s%n", result);
     }
 
     Faker createTheFaker() {
@@ -211,6 +166,14 @@ public class DatafakerCli implements Callable<Integer> {
     private void System_out_format(String format, Object... args) {
         //System.out.format(format, args);
         spec.commandLine().getOut().format(format, args);
+    }
+
+    enum AvailableModes {
+        locales, providers, providerMethods1, providerMethods2
+    }
+
+    enum DataModes {
+        expression, sample, sampleProvider1, sampleProvider2
     }
 
 }
