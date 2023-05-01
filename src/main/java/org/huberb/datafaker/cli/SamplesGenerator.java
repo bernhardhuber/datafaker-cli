@@ -18,6 +18,7 @@ package org.huberb.datafaker.cli;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -32,6 +33,19 @@ import org.huberb.datafaker.cli.DataFormatProcessor.ExpressionInternal;
  * @author berni3
  */
 class SamplesGenerator {
+
+    final Function<String, String> normalizeProviderName = (s) -> {
+        if (s == null) {
+            return null;
+        } else if (s.startsWith("*")) {
+            return null;
+        } else {
+            return s;
+        }
+    };
+    final Comparator<Method> comparatorMethodByName = (Method m1, Method m2) -> {
+        return m1.getClass().getName().compareTo(m2.getClass().getName());
+    };
 
     /**
      * Generate name, and address expressions.
@@ -67,19 +81,11 @@ class SamplesGenerator {
      * @return
      */
     public List<ExpressionInternal> sampleProviderAsExpressionInternalList1(Faker faker, String providerName) {
-        Function<String, String> normalizeProviderName = (s) -> {
-            if (s == null) {
-                return null;
-            } else if (s.startsWith("*")) {
-                return null;
-            } else {
-                return s;
-            }
-        };
+
         final String normalizedProviderName = normalizeProviderName.apply(providerName);
         final List<ExpressionInternal> resultExpressionInternal = new ArrayList<>();
 
-        final Predicate<Method> methodProviderPredicate = (m) -> {
+        final Predicate<Method> methodProviderPredicate = (Method m) -> {
             boolean result = true;
             if (normalizedProviderName != null) {
                 result = result && m.getParameterCount() == 0;
@@ -89,7 +95,7 @@ class SamplesGenerator {
             }
             return result;
         };
-        final Predicate<Method> methodSignaturePredicate = (m) -> {
+        final Predicate<Method> methodSignaturePredicate = (Method m) -> {
             boolean result = true;
             result = result && m.getParameterCount() == 0;
             result = result && m.getReturnType().equals(String.class);
@@ -99,7 +105,7 @@ class SamplesGenerator {
         final List<Method> methodList = new ProvidersQueries().findAllMethodsClassesExtendingAbstractProvider().stream()
                 .filter(methodProviderPredicate)
                 .filter(methodSignaturePredicate)
-                .sorted((m1, m2) -> m1.getClass().getName().compareTo(m2.getClass().getName()))
+                .sorted(comparatorMethodByName)
                 .collect(Collectors.toList());
 
         for (Method m : methodList) {
@@ -132,17 +138,10 @@ class SamplesGenerator {
      * @return
      */
     public List<ExpressionInternal> sampleProviderAsExpressionInternalList2(Faker faker, String providerName) {
-        Function<String, String> normalizeProviderName = (s) -> {
-            if (s == null) {
-                return null;
-            } else if (s.startsWith("*")) {
-                return null;
-            } else {
-                return s;
-            }
-        };
+
         final String normalizedProviderName = normalizeProviderName.apply(providerName);
         final List<ExpressionInternal> resultExpressionInternal = new ArrayList<>();
+
         final Predicate<Method> methodProviderPredicate = (m) -> {
             boolean result = true;
             if (normalizedProviderName != null) {
@@ -164,7 +163,7 @@ class SamplesGenerator {
         final List<Method> methodList = new ProvidersQueries().findAllMethodsClassesExtendingAbstractProvider().stream()
                 .filter(methodProviderPredicate)
                 .filter(methodSignaturePredicate)
-                .sorted((m1, m2) -> m1.getClass().getName().compareTo(m2.getClass().getName()))
+                .sorted(comparatorMethodByName)
                 .collect(Collectors.toList());
 
         for (Method m : methodList) {
