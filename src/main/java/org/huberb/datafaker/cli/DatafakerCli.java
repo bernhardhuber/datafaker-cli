@@ -156,9 +156,9 @@ public class DatafakerCli implements Callable<Integer> {
         final Faker faker = createTheFaker();
         Function<Integer, Integer> normalizeCountOfResults = (i) -> {
             if (i == null || i <= 0) {
-                i = 3;
+                return 3;
             } else if (i > 10000) {
-                i = 10000;
+                return 10000;
             }
             return i;
         };

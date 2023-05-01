@@ -25,7 +25,7 @@ import net.datafaker.providers.base.BaseProviders;
  */
 public class Icd3Diseases extends AbstractProvider<BaseProviders> {
 
-    private Icd3CodesDiseasesData icd3CodesDiseases;
+    private final Icd3CodesDiseasesData icd3CodesDiseases;
 
     /**
      * Create a new instance.
