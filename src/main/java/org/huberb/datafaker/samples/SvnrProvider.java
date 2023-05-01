@@ -16,6 +16,7 @@
 package org.huberb.datafaker.samples;
 
 import java.util.function.Predicate;
+import net.datafaker.Faker;
 import net.datafaker.providers.base.AbstractProvider;
 import net.datafaker.providers.base.BaseProviders;
 
@@ -33,7 +34,7 @@ import net.datafaker.providers.base.BaseProviders;
  * <p>
  * Die Prüfziffer errechnet sich aus dem Divisionsrest der Summe der einzelnen
  * Produkte geteilt durch 11.
- * <br/>
+ * <br>
  * Wenn der Divisionsrest 10 ergibt, so wird die Laufnummer um 1 erhöht und eine
  * neue Berechnung durchgeführt.
  * <p>
@@ -62,15 +63,36 @@ public class SvnrProvider extends AbstractProvider<BaseProviders> {
     private final int[] mulLaufnummer = {3, 7, 9};
     private final int[] mulGeburtsdatum = {5, 8, 4, 2, 1, 6};
 
+    /**
+     * Create a new instance.
+     *
+     * @param faker
+     * @see Faker
+     */
     public SvnrProvider(BaseProviders faker) {
         super(faker);
     }
 
+    /**
+     * Create a svnr for a random birthday.
+     * <p>
+     * The generated random birthday is 1 to 99 years in the past.
+     *
+     * @return
+     */
     public String svnr() {
         String geburtsdatum = genGeburtsdatum();
         return calcSvnr(geburtsdatum);
     }
 
+    /**
+     * Create a svnr for a given birthday.
+     * <p>
+     * Birthday shall have the format 'yyMMdd'.
+     *
+     * @param geburtsdatum
+     * @return
+     */
     public String svnrFor(String geburtsdatum) {
         return calcSvnr(geburtsdatum);
     }

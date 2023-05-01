@@ -37,9 +37,6 @@ public class Adapters {
      */
     public static class FakerFactory {
 
-        private FakerFactory() {
-        }
-
         /**
          * Create faker instance from language tag.
          * <p>
@@ -65,15 +62,15 @@ public class Adapters {
             return new Faker(locale);
         }
 
+        private FakerFactory() {
+        }
+
     }
 
     /**
      * Suppliers providing an instance of {@link Locale}.
      */
     public static class Locales {
-
-        private Locales() {
-        }
 
         /**
          * Return all available locales
@@ -104,5 +101,9 @@ public class Adapters {
         public static Function<Locale, String> localeToString() {
             return locale -> locale.toString();
         }
+
+        private Locales() {
+        }
+
     }
 }

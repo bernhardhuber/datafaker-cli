@@ -57,7 +57,7 @@ public class DatafakerCli implements Callable<Integer> {
     enum AvailableModes {
         locales, providers, providerMethods1, providerMethods2
     }
-    @Option(names = {"--available"},
+    @Option(names = {"-a", "--available"},
             description = "Valid values: ${COMPLETION-CANDIDATES}")
     private AvailableModes availableModes;
 
@@ -70,14 +70,14 @@ public class DatafakerCli implements Callable<Integer> {
     enum DataModes {
         expression, sample, sampleProvider1, sampleProvider2
     }
-    @Option(names = {"--expression"},
+    @Option(names = {"-e", "--expression"},
             required = false,
             defaultValue = "sample",
             description = "Valid values: ${COMPLETION-CANDIDATES}."
     )
     private DataModes dataModes;
 
-    @Option(names = {"--formats"},
+    @Option(names = {"-f", "--formats"},
             defaultValue = "csv",
             description = "Valid values: ${COMPLETION-CANDIDATES}.")
     private DataFormatProcessor.FormatEnum formatEnum;
@@ -86,12 +86,23 @@ public class DatafakerCli implements Callable<Integer> {
     private List<String> expressions;
 
     //-------------------------------------------------------------------------
+    /**
+     * Command line entry point.
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         final int exitCode = new CommandLine(new DatafakerCli()).execute(args);
         System.exit(exitCode);
     }
 
     //-------------------------------------------------------------------------
+    /**
+     * Entry point running this application.
+     *
+     * @return
+     * @throws Exception
+     */
     @Override
     public Integer call() throws Exception {
         System_out_format("Hello %s%n", this.getClass().getName());
@@ -145,9 +156,9 @@ public class DatafakerCli implements Callable<Integer> {
         final Faker faker = createTheFaker();
         Function<Integer, Integer> normalizeCountOfResults = (i) -> {
             if (i == null || i <= 0) {
-                i = 3;
+                return 3;
             } else if (i > 10000) {
-                i = 10000;
+                return 10000;
             }
             return i;
         };

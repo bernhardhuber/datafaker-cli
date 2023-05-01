@@ -25,16 +25,38 @@ import net.datafaker.providers.base.BaseProviders;
  */
 public class LeistungserbringerNummerProvider extends AbstractProvider<BaseProviders> {
 
+    /**
+     * Create a new instance.
+     *
+     * @param faker
+     * @see Faker
+     */
     public LeistungserbringerNummerProvider(BaseProviders faker) {
         super(faker);
     }
 
+    /**
+     * Return a vpnr number.
+     * <p>
+     * Return vpnr is a string having length 6, consisting only of digits,
+     * checksum digit is *not* guaranteed.
+     *
+     * @return
+     */
     public String vpnr() {
         // TODO check well-define length, and alphabet
         String result = faker.numerify("######");
         return result;
     }
 
+    /**
+     * Return a lenr number.
+     * <p>
+     * Return vpnr is a string having length 8, consisting only of digits,
+     * checksum digit is *not* guaranteed.
+     *
+     * @return
+     */
     public String lenr() {
         // TODO check well-define length, and alphabet
         String result = faker.numerify("########");
