@@ -17,12 +17,14 @@ package org.huberb.datafaker.cli;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 import net.datafaker.Faker;
 import org.huberb.datafaker.cli.DataFormatProcessor.ExpressionInternal;
 import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,16 +75,19 @@ public class SamplesGeneratorTest {
      * Test of sampleProviders method, of class SamplesGenerator.
      */
     @Test
-    public void testSampleProviders() {
+    public void test_sampleProviderAsExpressionInternalList1() {
         /*
         Sample
          */
-        String result = instance.sampleProviders(faker);
+        List<ExpressionInternal> result = instance.sampleProviderAsExpressionInternalList1(faker, "*");
+        List<String> fieldNames = result.stream().map(ei -> ei.fieldname).collect(Collectors.toList());
         String m = "" + result;
         Assertions.assertAll(
                 () -> assertNotNull(result),
                 //() -> assertEquals("", result),
-                () -> assertFalse(result.isBlank())
+                () -> assertFalse(result.isEmpty(), m),
+                () -> assertTrue(fieldNames.contains("Name-fullName"), m),
+                () -> assertTrue(fieldNames.contains("Address-fullAddress"), m)
         );
     }
 
@@ -90,16 +95,19 @@ public class SamplesGeneratorTest {
      * Test of sampleProviders2 method, of class SamplesGenerator.
      */
     @Test
-    public void testSampleProviders2() {
+    public void test_sampleProviderAsExpressionInternalList2() {
         /*
         Sample
          */
-        String result = instance.sampleProviders2(faker);
+        List<ExpressionInternal> result = instance.sampleProviderAsExpressionInternalList2(faker, "*");
+        List<String> fieldNames = result.stream().map(ei -> ei.fieldname).collect(Collectors.toList());
         String m = "" + result;
         Assertions.assertAll(
                 () -> assertNotNull(result),
                 //() -> assertEquals("", result),
-                () -> assertFalse(result.isBlank())
+                () -> assertFalse(result.isEmpty(), m),
+                () -> assertTrue(fieldNames.contains("Name-fullName"), m),
+                () -> assertTrue(fieldNames.contains("Address-fullAddress"), m)
         );
     }
 

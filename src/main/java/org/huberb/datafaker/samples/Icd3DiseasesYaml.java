@@ -34,18 +34,34 @@ public class Icd3DiseasesYaml extends AbstractProvider<BaseProviders> {
         return splitted;
     };
 
+    /**
+     * Create a new instance.
+     *
+     * @param faker
+     * @see Faker
+     */
     public Icd3DiseasesYaml(BaseProviders faker) {
         super(faker);
         faker.addPath(Locale.GERMAN, Paths.get("src/main/resources/icd3_diagnoses.yml"));
     }
 
     //----
+    /**
+     * Return an icd format having length 3.
+     *
+     * @return
+     */
     public String icdCode() {
         String line = faker.resolve(KEY + ".codes_diseases");
         String icd3Code = splitt.apply(line)[0];
         return icd3Code;
     }
 
+    /**
+     * Return a disease name.
+     *
+     * @return
+     */
     public String disease() {
         String line = faker.resolve(KEY + ".codes_diseases");
         String disease = splitt.apply(line)[1];
