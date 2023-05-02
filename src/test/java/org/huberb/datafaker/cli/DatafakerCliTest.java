@@ -15,9 +15,17 @@
  */
 package org.huberb.datafaker.cli;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import picocli.CommandLine;
 
 /**
  *
@@ -36,16 +44,44 @@ public class DatafakerCliTest {
      * Test of main method, of class DatafakerCli.
      */
     @Test
-    @Disabled(value = "Figer out how-to mock picocli")
-    public void testMain() {
-    }
+    public void testMain_no_args() throws IOException {
+        CommandLine cmd = new CommandLine(instance);
+        try (StringWriter swErr = new StringWriter(); StringWriter swOut = new StringWriter()) {
+            try (PrintWriter err = new PrintWriter(swErr); PrintWriter out = new PrintWriter(swOut)) {
+                cmd.setErr(err);
+                cmd.setOut(out);
+                int exitCode = cmd.execute("");
+                assertEquals(0, exitCode);
+            }
+            swErr.flush();
+            swOut.flush();
+            /*
+                Hello org.huberb.datafaker.cli.DatafakerCli
+                expression: locale: en_US
+                fieldname name
+                fieldname address
 
-    /**
-     * Test of call method, of class DatafakerCli.
-     */
-    @Test
-    @Disabled(value = "Figer out how-to mock picocli")
-    public void testCall() throws Exception {
+                result
+                "name","address"
+                "Tobie Goldner","Suite 889 74374 Dean Trail, Lake Wilfredo, LA 43007"
+                "Mrs. Lou Kohler","Apt. 059 0867 Cora Lock, North Jacqualinetown, NC 30080"
+                "Beaulah Reichert","449 Becker Plains, North Harrisonside, NY 95819"
+             */
+            assertEquals("", swErr.toString());
+            String outResult = swOut.toString();
+            String m = "" + outResult;
+
+            String pattern = "\"[A-Za-z0-9 ,.\"]*\",\"[A-Za-z0-9 ,.]*\"";
+            Matcher matcher = Pattern.compile(pattern).matcher(outResult);
+            assertTrue(matcher.find(), m);
+
+            assertAll(
+                    () -> assertTrue(outResult.contains("locale:"), m),
+                    () -> assertTrue(outResult.contains("fieldname name"), m),
+                    () -> assertTrue(outResult.contains("fieldname address"), m),
+                    () -> assertTrue(outResult.contains("\"name\",\"address\""), m)
+            );
+        }
     }
 
 }
