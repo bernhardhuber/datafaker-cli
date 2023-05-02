@@ -35,15 +35,6 @@ import org.huberb.datafaker.cli.DataFormatProcessor.ExpressionInternal;
  */
 class SamplesGenerator {
 
-    final Function<String, String> normalizeProviderName = (s) -> {
-        if (s == null) {
-            return null;
-        } else if (s.startsWith("*")) {
-            return null;
-        } else {
-            return s;
-        }
-    };
     final Function<List<String>, List<String>> normalizeProviderNames = (l) -> {
         boolean allProviders = l.stream()
                 .map(s -> s.trim())
@@ -78,7 +69,7 @@ class SamplesGenerator {
      * @return list of faker-expressions
      * @see Faker#expression(java.lang.String)
      */
-    public List< String> sampleExpressions() {
+    public List<String> sampleExpressions() {
         return Arrays.asList("#{Name.fullName}", "#{Address.fullAddress}");
     }
 
