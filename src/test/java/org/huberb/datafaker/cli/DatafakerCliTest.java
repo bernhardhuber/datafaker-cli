@@ -55,7 +55,7 @@ public class DatafakerCliTest {
             }
             swErr.flush();
             swOut.flush();
-            /*
+            /* Sample:
                 Hello org.huberb.datafaker.cli.DatafakerCli
                 expression: locale: en_US
                 fieldname name
@@ -76,6 +76,7 @@ public class DatafakerCliTest {
             assertTrue(matcher.find(), m);
 
             assertAll(
+                    () -> assertTrue(outResult.contains("Hello org.huberb.datafaker.cli.DatafakerCli"), m),
                     () -> assertTrue(outResult.contains("locale:"), m),
                     () -> assertTrue(outResult.contains("fieldname name"), m),
                     () -> assertTrue(outResult.contains("fieldname address"), m),
