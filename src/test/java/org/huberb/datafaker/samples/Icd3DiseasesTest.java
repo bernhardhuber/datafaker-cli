@@ -46,7 +46,7 @@ public class Icd3DiseasesTest {
 
     @BeforeEach
     public void setUp() {
-        instance = faker.getProvider(Icd3Diseases.class, Icd3Diseases::new, faker);
+        instance = Faker.getProvider(Icd3Diseases.class, Icd3Diseases::new, faker);
     }
 
     @Test

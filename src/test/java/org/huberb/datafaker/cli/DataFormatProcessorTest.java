@@ -35,7 +35,7 @@ public class DataFormatProcessorTest {
     static Faker faker;
 
     @BeforeAll
-    static void setUpAll() {
+    public static void setUpAll() {
         faker = Adapters.FakerFactory.createFakerFromLocale(Locale.ENGLISH);
     }
     DataFormatProcessor instance;

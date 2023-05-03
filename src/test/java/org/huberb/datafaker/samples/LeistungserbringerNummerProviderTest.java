@@ -51,7 +51,7 @@ public class LeistungserbringerNummerProviderTest {
 
     @BeforeEach
     public void setUp() {
-        instance = faker.getProvider(LeistungserbringerNummerProvider.class, LeistungserbringerNummerProvider::new, faker);
+        instance = Faker.getProvider(LeistungserbringerNummerProvider.class, LeistungserbringerNummerProvider::new, faker);
     }
 
     /**

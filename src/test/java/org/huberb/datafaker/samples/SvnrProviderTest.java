@@ -52,7 +52,7 @@ public class SvnrProviderTest {
 
     @BeforeEach
     public void setUpEach() {
-        instance = faker.getProvider(SvnrProvider.class, SvnrProvider::new, faker);
+        instance = Faker.getProvider(SvnrProvider.class, SvnrProvider::new, faker);
     }
 
     /**

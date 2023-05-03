@@ -46,7 +46,7 @@ public class Icd3DiseasesYamlTest {
 
     @BeforeEach
     public void setUp() {
-        instance = faker.getProvider(Icd3DiseasesYaml.class, Icd3DiseasesYaml::new, faker);
+        instance = Faker.getProvider(Icd3DiseasesYaml.class, Icd3DiseasesYaml::new, faker);
     }
 
     @Test

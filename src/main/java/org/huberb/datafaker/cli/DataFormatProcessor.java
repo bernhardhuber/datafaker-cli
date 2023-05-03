@@ -187,7 +187,7 @@ public class DataFormatProcessor {
         List<SimpleField<Object, String>> l = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
-        Schema<Object, String> schema = Schema.of(l.toArray(new SimpleField[0]));
+        Schema<Object, String> schema = Schema.of(l.toArray(SimpleField[]::new));
         CsvTransformer transformer = CsvTransformer.<String>builder()
                 .header(true)
                 .separator(",")
@@ -202,7 +202,7 @@ public class DataFormatProcessor {
         List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
-        Schema<Object, String> schema = Schema.of(simpleFields.toArray(new SimpleField[0]));
+        Schema<Object, String> schema = Schema.of(simpleFields.toArray(SimpleField[]::new));
         CsvTransformer transformer = CsvTransformer.<String>builder()
                 .header(true)
                 .separator("\t")
@@ -216,7 +216,7 @@ public class DataFormatProcessor {
         List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
-        Schema<Object, String> schema = Schema.of(simpleFields.toArray(new SimpleField[0]));
+        Schema<Object, String> schema = Schema.of(simpleFields.toArray(SimpleField[]::new));
         JsonTransformer transformer = JsonTransformer.<String>builder()
                 .formattedAs(FormattedAs.JSON_ARRAY)
                 .build();
@@ -228,7 +228,7 @@ public class DataFormatProcessor {
         List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
-        Schema<Object, String> schema = Schema.of(simpleFields.toArray(new SimpleField[0]));
+        Schema<Object, String> schema = Schema.of(simpleFields.toArray(SimpleField[]::new));
         SqlTransformer transformer = SqlTransformer.<String>builder()
                 .batch(5)
                 .tableName("DATAFAKER_TABLE")
@@ -243,7 +243,7 @@ public class DataFormatProcessor {
         List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
-        Schema<Object, String> schema = Schema.of(simpleFields.toArray(new SimpleField[0]));
+        Schema<Object, String> schema = Schema.of(simpleFields.toArray(SimpleField[]::new));
         XmlTransformer transformer = new XmlTransformerBuilder<String>()
                 .build();
 
@@ -261,7 +261,7 @@ public class DataFormatProcessor {
         List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
-        Schema<Object, String> schema = Schema.of(simpleFields.toArray(new SimpleField[0]));
+        Schema<Object, String> schema = Schema.of(simpleFields.toArray(SimpleField[]::new));
         YamlTransformer transformer = new YamlTransformer<String>();
 
         String result = transformer.generate(schema, limit);

@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -41,15 +40,10 @@ import picocli.CommandLine;
  */
 public class DatafakerCliTest {
 
-    DatafakerCli instance;
-
-    @BeforeEach
-    public void setUp() {
-        instance = new DatafakerCli();
-    }
-
     /**
      * Test of main method, of class DatafakerCli.
+     *
+     * @throws java.io.IOException
      */
     @Test
     public void testMain_no_args() throws IOException {
@@ -90,6 +84,9 @@ public class DatafakerCliTest {
 
     /**
      * Test of main method, of class DatafakerCli.
+     *
+     * @param availableModes
+     * @throws java.io.IOException
      */
     @ParameterizedTest
     @EnumSource(value = AvailableModes.class)
@@ -120,6 +117,9 @@ public class DatafakerCliTest {
 
     /**
      * Test of main method, of class DatafakerCli.
+     *
+     * @param dataModes
+     * @throws java.io.IOException
      */
     @ParameterizedTest
     @EnumSource(value = DataModes.class)
@@ -153,6 +153,8 @@ public class DatafakerCliTest {
 
     /**
      * Test of main method, of class DatafakerCli.
+     *
+     * @throws java.io.IOException
      */
     @Test
     public void testMain_expression_parameters() throws IOException {

@@ -32,7 +32,7 @@ public class FakerTest {
     static Faker faker;
 
     @BeforeAll
-    static void setUpAll() {
+    public static void setUpAll() {
         faker = Adapters.FakerFactory.createFakerFromLocale(Locale.getDefault());
     }
 
@@ -41,7 +41,7 @@ public class FakerTest {
         String result = faker.relationships().direct();
         Assertions.assertAll(
                 () -> assertNotNull(result),
-                () -> assertTrue(!result.isBlank(),""+result)
+                () -> assertTrue(!result.isBlank(), "" + result)
         );
     }
 }
