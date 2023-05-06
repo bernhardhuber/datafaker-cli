@@ -55,7 +55,8 @@ public class DatafakerCliTest {
         String swErr = resultsOutErr[1];
         /* Sample:
                 Hello org.huberb.datafaker.cli.DatafakerCli
-                expression: locale: en_US
+                data-format-processor:
+                locale: en_US
                 fieldname name
                 fieldname address
 
