@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import net.datafaker.Faker;
 import org.huberb.datafaker.cli.Adapters.FakerFactory;
@@ -48,6 +48,9 @@ import picocli.CommandLine.Spec;
         description = "Run datafaker from the command line%n"
 )
 public class DatafakerCli implements Callable<Integer> {
+
+    private static final int DEFAULT_COUNT_OF_RESULT = 3;
+    private static final int MAX_COUNT_OF_RESULT = 10000;
 
     //-------------------------------------------------------------------------
     /**
@@ -75,8 +78,8 @@ public class DatafakerCli implements Callable<Integer> {
 
     @Option(names = {"-c", "--count"},
             required = false,
-            defaultValue = "3",
-            description = "Count of results.")
+            defaultValue = "" + DEFAULT_COUNT_OF_RESULT,
+            description = "Count of results. Minimum value: 0, Maximum value: " + MAX_COUNT_OF_RESULT + ".")
     private int countOfResults;
 
     @Option(names = {"-e", "--expression"},
@@ -104,9 +107,6 @@ public class DatafakerCli implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         System_out_format("Hello %s%n", this.getClass().getName());
-        if (countOfResults < 0) {
-            countOfResults = 1;
-        }
 
         if (availableModes != null) {
             handleAvailableModes(availableModes);
@@ -152,11 +152,11 @@ public class DatafakerCli implements Callable<Integer> {
     private void handleDataFormat() {
         // step 0: init
         final Faker faker = createTheFaker();
-        Function<Integer, Integer> normalizeCountOfResults = (i) -> {
+        UnaryOperator<Integer> normalizeCountOfResults = (i) -> {
             if (i == null || i <= 0) {
-                return 3;
-            } else if (i > 10000) {
-                return 10000;
+                return DEFAULT_COUNT_OF_RESULT;
+            } else if (i > MAX_COUNT_OF_RESULT) {
+                return MAX_COUNT_OF_RESULT;
             }
             return i;
         };
@@ -186,7 +186,7 @@ public class DatafakerCli implements Callable<Integer> {
                     "#{Name.fullName}",
                     "#{Address.fullAddress}"));
         }
-        System_out_format("expression: %s%n", dfp.textRepresentation());
+        System_out_format("data-format-processor:%n%s%n", dfp.textRepresentation());
         // step 2: format
         String result = dfp.format(formatEnum);
         System_out_format("result%n%s%n", result);
