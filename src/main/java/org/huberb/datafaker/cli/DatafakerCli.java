@@ -91,6 +91,11 @@ public class DatafakerCli implements Callable<Integer> {
             description = "Valid values: ${COMPLETION-CANDIDATES}.")
     private DataFormatProcessor.FormatEnum formatEnum;
 
+    @Option(names = { "--format-paramter"},
+            defaultValue = "",
+            description = "Define format parameter")
+    private String formatParameters;
+
     @Parameters(index = "0..*", description = "expression arguments.")
     private List<String> expressions;
 

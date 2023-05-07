@@ -17,6 +17,7 @@ package org.huberb.datafaker.cli;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -191,6 +192,7 @@ public class DataFormatProcessor {
         CsvTransformer transformer = CsvTransformer.<String>builder()
                 .header(true)
                 .separator(",")
+                .quote('"')
                 .build();
 
         String result = transformer.generate(schema, limit);
@@ -206,6 +208,7 @@ public class DataFormatProcessor {
         CsvTransformer transformer = CsvTransformer.<String>builder()
                 .header(true)
                 .separator("\t")
+                .quote('"')
                 .build();
 
         String result = transformer.generate(schema, limit);
@@ -245,6 +248,7 @@ public class DataFormatProcessor {
                 .collect(Collectors.toList());
         Schema<Object, String> schema = Schema.of(simpleFields.toArray(new SimpleField[0]));
         XmlTransformer transformer = new XmlTransformerBuilder<String>()
+                .pretty(true)
                 .build();
 
         CharSequence result = transformer.generate(schema, limit);
@@ -319,5 +323,76 @@ public class DataFormatProcessor {
      */
     public enum FormatEnum {
         txt, csv, tsv, json, sql, xml, yaml
+    }
+
+    static class FormatParameters {
+
+        static Function<String, Boolean> convToBoolean = (s) -> {
+            return Boolean.valueOf(s);
+        };
+        static Function<String, Integer> convToInteger = (s) -> {
+            return Integer.valueOf(s);
+        };
+
+        static class FormatterCsv {
+
+            boolean header = true;
+            String separator = ",";
+            char quote = '"';
+
+            void parameter(Map<String, String> m) {
+                String headerV = m.getOrDefault("header", "true");
+                this.header = convToBoolean.apply(headerV);
+                String separatorV = m.getOrDefault("separator", ",");
+                this.separator = separatorV;
+                String quoteV = m.getOrDefault("quote", "\"");
+                this.quote = quoteV.charAt(0);
+            }
+        }
+
+        static class FormatterTsv {
+
+            boolean header = true;
+            String separator = "\t";
+            char quote = '"';
+
+            void parameter(Map<String, String> m) {
+                String headerV = m.getOrDefault("header", "true");
+                this.header = convToBoolean.apply(headerV);
+                String separatorV = m.getOrDefault("separator", "\t");
+                this.separator = separatorV;
+                String quoteV = m.getOrDefault("quote", "\"");
+                this.quote = quoteV.charAt(0);
+            }
+        }
+
+        static class FormatterSql {
+
+            int batch = 5;
+            String tableName = "DATAFAKER_TABLE";
+            SqlDialect sqlDialect = SqlDialect.H2;
+
+            void parameter(Map<String, String> m) {
+                String batchV = m.getOrDefault("batch", "5");
+                this.batch = convToInteger.apply(batchV);
+                String tableNameV = m.getOrDefault("tableName", "DATAFAKER_TABLE");
+                this.tableName = tableNameV;
+                String sqlDialectV = m.getOrDefault("quote", SqlDialect.ANSI.toString());
+                this.sqlDialect = SqlDialect.valueOf(sqlDialectV);
+            }
+        }
+
+        static class FormatterXml {
+
+            boolean pretty = true;
+            String rootTag = "root";
+
+            void parameter(Map<String, String> m) {
+                String prettyV = m.getOrDefault("pretty", "true");
+                this.pretty = convToBoolean.apply(prettyV);
+                String rootTagV = m.getOrDefault("rootTag", "root");
+                this.rootTag = rootTagV;
+            }
+        }
     }
 }
