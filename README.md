@@ -81,7 +81,7 @@ public java.lang.String net.datafaker.providers.base.App.name()
 Print evaluate one or more datafaker's expression.
 
 ```
-java -jar datafaker-cli.jar$ --expression=expression "#{Name.firstName}" "#{Address.country}"
+java -jar datafaker-cli.jar --expression=expression "#{Name.firstName}" "#{Address.country}"
 ...
 result
 "firstName","country"
