@@ -16,6 +16,7 @@
 package org.huberb.datafaker.cli;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.function.Function;
 import net.datafaker.Faker;
@@ -85,7 +86,7 @@ public class DataFormatProcessorTest {
     public void testFormatTxt() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result1 = instance.formatTxt();
+        String result1 = instance.formatTxt(Collections.emptyMap());
         assertTrue(!result1.isBlank(), "" + result1);
     }
 
@@ -96,7 +97,7 @@ public class DataFormatProcessorTest {
     public void testFormatCsv() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result2 = instance.formatCsv();
+        String result2 = instance.formatCsv(Collections.emptyMap());
         assertTrue(!result2.isBlank(), "" + result2);
     }
 
@@ -107,7 +108,7 @@ public class DataFormatProcessorTest {
     public void testFormatTsv() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result2 = instance.formatTsv();
+        String result2 = instance.formatTsv(Collections.emptyMap());
         assertTrue(!result2.isBlank(), "" + result2);
     }
 
@@ -118,7 +119,7 @@ public class DataFormatProcessorTest {
     public void testFormatJson() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result3 = instance.formatJson();
+        String result3 = instance.formatJson(Collections.emptyMap());
         assertTrue(!result3.isBlank(), "" + result3);
     }
 
@@ -129,7 +130,7 @@ public class DataFormatProcessorTest {
     public void testFormatSql() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result4 = instance.formatSql();
+        String result4 = instance.formatSql(Collections.emptyMap());
         assertTrue(!result4.isBlank(), "" + result4);
     }
 
@@ -140,7 +141,7 @@ public class DataFormatProcessorTest {
     public void testFormatXml() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result5 = instance.formatXml();
+        String result5 = instance.formatXml(Collections.emptyMap());
         assertTrue(!result5.isBlank(), "" + result5);
     }
 
@@ -151,7 +152,7 @@ public class DataFormatProcessorTest {
     public void testFormatYaml() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result5 = instance.formatYaml();
+        String result5 = instance.formatYaml(Collections.emptyMap());
         assertTrue(!result5.isBlank(), "" + result5);
     }
 
@@ -163,31 +164,31 @@ public class DataFormatProcessorTest {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
         {
-            String result1 = instance.format(FormatEnum.txt);
+            String result1 = instance.format(FormatEnum.txt, Collections.emptyMap());
             assertTrue(!result1.isBlank(), "" + result1);
         }
         {
-            String result2 = instance.format(FormatEnum.csv);
+            String result2 = instance.format(FormatEnum.csv, Collections.emptyMap());
             assertTrue(!result2.isBlank(), "" + result2);
         }
         {
-            String result2 = instance.format(FormatEnum.tsv);
+            String result2 = instance.format(FormatEnum.tsv, Collections.emptyMap());
             assertTrue(!result2.isBlank(), "" + result2);
         }
         {
-            String result3 = instance.format(FormatEnum.json);
+            String result3 = instance.format(FormatEnum.json, Collections.emptyMap());
             assertTrue(!result3.isBlank(), "" + result3);
         }
         {
-            String result4 = instance.format(FormatEnum.sql);
+            String result4 = instance.format(FormatEnum.sql, Collections.emptyMap());
             assertTrue(!result4.isBlank(), "" + result4);
         }
         {
-            String result5 = instance.format(FormatEnum.xml);
+            String result5 = instance.format(FormatEnum.xml, Collections.emptyMap());
             assertTrue(!result5.isBlank(), "" + result5);
         }
         {
-            String result6 = instance.format(FormatEnum.yaml);
+            String result6 = instance.format(FormatEnum.yaml, Collections.emptyMap());
             assertTrue(!result6.isBlank(), "" + result6);
         }
     }

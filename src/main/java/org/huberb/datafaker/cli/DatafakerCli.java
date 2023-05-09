@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
@@ -94,6 +95,11 @@ public class DatafakerCli implements Callable<Integer> {
             description = "Valid values: ${COMPLETION-CANDIDATES}.")
     private DataFormatProcessor.FormatEnum formatEnum;
 
+    @Option(names = {"--format-parameter"},
+            defaultValue = "",
+            description = "Define format parameter")
+    private String formatParameters;
+
     @Parameters(index = "0..*", description = "expression arguments.")
     private List<String> expressions;
 
@@ -162,15 +168,15 @@ public class DatafakerCli implements Callable<Integer> {
         };
         Predicate<List<String>> isNotEmpty = l -> l != null && !l.isEmpty();
 
-        final DataFormatProcessor dfp = new DataFormatProcessor(faker,
+        final DataFormatProcessor dataFormatProcessor = new DataFormatProcessor(faker,
                 normalizeCountOfResults.apply(this.countOfResults));
 
         // step 1: data
         if (this.dataModes == DataModes.sample) {
             SamplesGenerator samplesGenerator = new SamplesGenerator();
-            dfp.addExpressionsFromExpressionInternalList(samplesGenerator.sampleExpressions(faker));
+            dataFormatProcessor.addExpressionsFromExpressionInternalList(samplesGenerator.sampleExpressions(faker));
         } else if (this.dataModes == DataModes.expression && isNotEmpty.test(expressions)) {
-            dfp.addExpressionsFromStringList(expressions);
+            dataFormatProcessor.addExpressionsFromStringList(expressions);
         } else if (this.dataModes == DataModes.sampleProvider) {
             List<String> providerNames = Collections.emptyList();
             if (isNotEmpty.test(expressions)) {
@@ -178,17 +184,19 @@ public class DatafakerCli implements Callable<Integer> {
                 providerNames.addAll(expressions);
             }
             SamplesGenerator sampleGenerator = new SamplesGenerator();
-            dfp.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList2(faker, providerNames));
+            dataFormatProcessor.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList2(faker, providerNames));
         }
 
-        if (dfp.getCountOfExpressions() == 0) {
-            dfp.addExpressionsFromStringList(Arrays.asList(
+        if (dataFormatProcessor.getCountOfExpressions() == 0) {
+            dataFormatProcessor.addExpressionsFromStringList(Arrays.asList(
                     "#{Name.fullName}",
                     "#{Address.fullAddress}"));
         }
-        System_out_format("data-format-processor:%n%s%n", dfp.textRepresentation());
+        System_out_format("data-format-processor:%n%s%n", dataFormatProcessor.textRepresentation());
         // step 2: format
-        String result = dfp.format(formatEnum);
+        ParameterParser parameterParser = new ParameterParser();
+        Map<String, String> m = parameterParser.parseToMap(formatParameters);
+        String result = dataFormatProcessor.format(formatEnum, m);
         System_out_format("result%n%s%n", result);
     }
 

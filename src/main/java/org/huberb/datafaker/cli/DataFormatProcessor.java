@@ -17,6 +17,7 @@ package org.huberb.datafaker.cli;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -33,6 +34,10 @@ import net.datafaker.transformations.XmlTransformer.XmlTransformerBuilder;
 import net.datafaker.transformations.YamlTransformer;
 import net.datafaker.transformations.sql.SqlDialect;
 import net.datafaker.transformations.sql.SqlTransformer;
+import org.huberb.datafaker.cli.DataFormatProcessor.FormatParameters.FormatterCsv;
+import org.huberb.datafaker.cli.DataFormatProcessor.FormatParameters.FormatterSql;
+import org.huberb.datafaker.cli.DataFormatProcessor.FormatParameters.FormatterTsv;
+import org.huberb.datafaker.cli.DataFormatProcessor.FormatParameters.FormatterXml;
 
 /**
  * Processor accepting some data, and formats it.
@@ -149,31 +154,33 @@ public class DataFormatProcessor {
      * Format data for a given format type.
      *
      * @param fe represents the format type
+     * @param formatParameters
      * @return
      * @see FormatEnum
      */
-    public String format(FormatEnum fe) {
+    public String format(FormatEnum fe, Map<String, String> m) {
+
         if (fe == FormatEnum.txt) {
-            return formatTxt();
+            return formatTxt(m);
         } else if (fe == FormatEnum.csv) {
-            return formatCsv();
+            return formatCsv(m);
         } else if (fe == FormatEnum.tsv) {
-            return formatTsv();
+            return formatTsv(m);
         } else if (fe == FormatEnum.json) {
-            return formatJson();
+            return formatJson(m);
         } else if (fe == FormatEnum.sql) {
-            return formatSql();
+            return formatSql(m);
         } else if (fe == FormatEnum.xml) {
-            return formatXml();
+            return formatXml(m);
         } else if (fe == FormatEnum.yaml) {
-            return formatYaml();
+            return formatYaml(m);
         } else {
             throw new RuntimeException(String.format("Unsupported format %s", fe));
         }
     }
 
     //-------------------------------------------------------------------------
-    protected String formatTxt() {
+    protected String formatTxt(Map<String, String> m) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < limit; i++) {
             expressionInternalList.forEach(ei -> {
@@ -183,14 +190,16 @@ public class DataFormatProcessor {
         return sb.toString();
     }
 
-    protected String formatCsv() {
+    protected String formatCsv(Map<String, String> m) {
+        FormatterCsv formatterCsv = FormatterCsv.withMap(m);
         List<SimpleField<Object, String>> l = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
         Schema<Object, String> schema = Schema.of(l.toArray(SimpleField[]::new));
         CsvTransformer transformer = CsvTransformer.<String>builder()
-                .header(true)
-                .separator(",")
+                .header(formatterCsv.header)
+                .separator(formatterCsv.separator)
+                .quote(formatterCsv.quote)
                 .build();
 
         String result = transformer.generate(schema, limit);
@@ -198,21 +207,23 @@ public class DataFormatProcessor {
 
     }
 
-    protected String formatTsv() {
+    protected String formatTsv(Map<String, String> m) {
+        FormatterTsv formatterTsv = FormatterTsv.withMap(m);
         List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
         Schema<Object, String> schema = Schema.of(simpleFields.toArray(SimpleField[]::new));
         CsvTransformer transformer = CsvTransformer.<String>builder()
-                .header(true)
-                .separator("\t")
+                .header(formatterTsv.header)
+                .separator(formatterTsv.separator)
+                .quote(formatterTsv.quote)
                 .build();
 
         String result = transformer.generate(schema, limit);
         return result;
     }
 
-    protected String formatJson() {
+    protected String formatJson(Map<String, String> m) {
         List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
@@ -224,40 +235,43 @@ public class DataFormatProcessor {
         return result;
     }
 
-    protected String formatSql() {
+    protected String formatSql(Map<String, String> m) {
+        FormatterSql formatterSql = FormatterSql.withMap(m);
         List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
         Schema<Object, String> schema = Schema.of(simpleFields.toArray(SimpleField[]::new));
         SqlTransformer transformer = SqlTransformer.<String>builder()
-                .batch(5)
-                .tableName("DATAFAKER_TABLE")
-                .dialect(SqlDialect.H2)
+                .batch(formatterSql.batch)
+                .tableName(formatterSql.tableName)
+                .dialect(formatterSql.sqlDialect)
                 .build();
 
         String result = transformer.generate(schema, limit);
         return result;
     }
 
-    protected String formatXml() {
+    protected String formatXml(Map<String, String> m) {
+        FormatterXml formatterXml = FormatterXml.withMap(m);
         List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
         Schema<Object, String> schema = Schema.of(simpleFields.toArray(SimpleField[]::new));
         XmlTransformer transformer = new XmlTransformerBuilder<String>()
+                .pretty(formatterXml.pretty)
                 .build();
 
         CharSequence result = transformer.generate(schema, limit);
         StringBuilder sb = new StringBuilder();
-        sb.append("<root>")
+        sb.append("<").append(formatterXml.rootTag).append(">")
                 .append(System.lineSeparator())
                 .append(result)
                 .append(System.lineSeparator())
-                .append("</root>");
+                .append("</").append(formatterXml.rootTag).append(">");
         return sb.toString();
     }
 
-    protected String formatYaml() {
+    protected String formatYaml(Map<String, String> m) {
         List<SimpleField<Object, String>> simpleFields = expressionInternalList.stream()
                 .map(ei -> Field.field(ei.fieldname, ei.expressionSupplier))
                 .collect(Collectors.toList());
@@ -319,5 +333,100 @@ public class DataFormatProcessor {
      */
     public enum FormatEnum {
         txt, csv, tsv, json, sql, xml, yaml
+    }
+
+    /**
+     * Formatter parameter wrappers.
+     */
+    static class FormatParameters {
+
+        static Function<String, Boolean> convToBoolean = (s) -> {
+            return Boolean.valueOf(s);
+        };
+        static Function<String, Integer> convToInteger = (s) -> {
+            return Integer.valueOf(s);
+        };
+
+        /**
+         * Holds parameters of csv formatting.
+         */
+        public static class FormatterCsv {
+
+            boolean header = true;
+            String separator = ",";
+            char quote = '"';
+
+            public static FormatterCsv withMap(Map<String, String> m) {
+                FormatterCsv instance = new FormatterCsv() {
+                    {
+                        header = convToBoolean.apply(m.getOrDefault("header", "true"));
+                        separator = m.getOrDefault("separator", ",");
+                        quote = m.getOrDefault("quote", "\"").charAt(0);
+                    }
+                };
+                return instance;
+            }
+        }
+
+        /**
+         * Holds parameters of tsv formatting.
+         */
+        public static class FormatterTsv {
+
+            boolean header = true;
+            String separator = "\t";
+            char quote = '"';
+
+            public static FormatterTsv withMap(Map<String, String> m) {
+                FormatterTsv instance = new FormatterTsv() {
+                    {
+                        header = convToBoolean.apply(m.getOrDefault("header", "true"));
+                        separator = m.getOrDefault("separator", "\t");
+                        quote = m.getOrDefault("quote", "\"").charAt(0);
+                    }
+                };
+                return instance;
+            }
+        }
+
+        /**
+         * Holds parameters of sql formatting.
+         */
+        public static class FormatterSql {
+
+            int batch = 5;
+            String tableName = "DATAFAKER_TABLE";
+            SqlDialect sqlDialect = SqlDialect.H2;
+
+            public static FormatterSql withMap(Map<String, String> m) {
+                FormatterSql instance = new FormatterSql() {
+                    {
+                        batch = convToInteger.apply(m.getOrDefault("batch", "5"));
+                        tableName = m.getOrDefault("tableName", "DATAFAKER_TABLE");
+                        sqlDialect = SqlDialect.valueOf(m.getOrDefault("quote", SqlDialect.ANSI.toString()));
+                    }
+                };
+                return instance;
+            }
+        }
+
+        /**
+         * Holds parameters of xml formatting.
+         */
+        public static class FormatterXml {
+
+            boolean pretty = true;
+            String rootTag = "root";
+
+            public static FormatterXml withMap(Map<String, String> m) {
+                FormatterXml instance = new FormatterXml() {
+                    {
+                        pretty = convToBoolean.apply(m.getOrDefault("pretty", "true"));
+                        rootTag = m.getOrDefault("rootTag", "root");
+                    }
+                };
+                return instance;
+            }
+        }
     }
 }
