@@ -335,6 +335,9 @@ public class DataFormatProcessor {
         txt, csv, tsv, json, sql, xml, yaml
     }
 
+    /**
+     * Formatter parameter wrappers.
+     */
     static class FormatParameters {
 
         static Function<String, Boolean> convToBoolean = (s) -> {
@@ -344,71 +347,84 @@ public class DataFormatProcessor {
             return Integer.valueOf(s);
         };
 
-        static class FormatterCsv {
+        /**
+         * Holds parameters of csv formatting.
+         */
+        public static class FormatterCsv {
 
             boolean header = true;
             String separator = ",";
             char quote = '"';
 
-            static FormatterCsv withMap(Map<String, String> m) {
-                FormatterCsv instance = new FormatterCsv();
-                String headerV = m.getOrDefault("header", "true");
-                instance.header = convToBoolean.apply(headerV);
-                String separatorV = m.getOrDefault("separator", ",");
-                instance.separator = separatorV;
-                String quoteV = m.getOrDefault("quote", "\"");
-                instance.quote = quoteV.charAt(0);
+            public static FormatterCsv withMap(Map<String, String> m) {
+                FormatterCsv instance = new FormatterCsv() {
+                    {
+                        header = convToBoolean.apply(m.getOrDefault("header", "true"));
+                        separator = m.getOrDefault("separator", ",");
+                        quote = m.getOrDefault("quote", "\"").charAt(0);
+                    }
+                };
                 return instance;
             }
         }
 
-        static class FormatterTsv {
+        /**
+         * Holds parameters of tsv formatting.
+         */
+        public static class FormatterTsv {
 
             boolean header = true;
             String separator = "\t";
             char quote = '"';
 
-            static FormatterTsv withMap(Map<String, String> m) {
-                FormatterTsv instance = new FormatterTsv();
-                String headerV = m.getOrDefault("header", "true");
-                instance.header = convToBoolean.apply(headerV);
-                String separatorV = m.getOrDefault("separator", "\t");
-                instance.separator = separatorV;
-                String quoteV = m.getOrDefault("quote", "\"");
-                instance.quote = quoteV.charAt(0);
+            public static FormatterTsv withMap(Map<String, String> m) {
+                FormatterTsv instance = new FormatterTsv() {
+                    {
+                        header = convToBoolean.apply(m.getOrDefault("header", "true"));
+                        separator = m.getOrDefault("separator", "\t");
+                        quote = m.getOrDefault("quote", "\"").charAt(0);
+                    }
+                };
                 return instance;
             }
         }
 
-        static class FormatterSql {
+        /**
+         * Holds parameters of sql formatting.
+         */
+        public static class FormatterSql {
 
             int batch = 5;
             String tableName = "DATAFAKER_TABLE";
             SqlDialect sqlDialect = SqlDialect.H2;
 
-            static FormatterSql withMap(Map<String, String> m) {
-                FormatterSql instance = new FormatterSql();
-                String batchV = m.getOrDefault("batch", "5");
-                instance.batch = convToInteger.apply(batchV);
-                String tableNameV = m.getOrDefault("tableName", "DATAFAKER_TABLE");
-                instance.tableName = tableNameV;
-                String sqlDialectV = m.getOrDefault("quote", SqlDialect.ANSI.toString());
-                instance.sqlDialect = SqlDialect.valueOf(sqlDialectV);
+            public static FormatterSql withMap(Map<String, String> m) {
+                FormatterSql instance = new FormatterSql() {
+                    {
+                        batch = convToInteger.apply(m.getOrDefault("batch", "5"));
+                        tableName = m.getOrDefault("tableName", "DATAFAKER_TABLE");
+                        sqlDialect = SqlDialect.valueOf(m.getOrDefault("quote", SqlDialect.ANSI.toString()));
+                    }
+                };
                 return instance;
             }
         }
 
-        static class FormatterXml {
+        /**
+         * Holds parameters of xml formatting.
+         */
+        public static class FormatterXml {
 
             boolean pretty = true;
             String rootTag = "root";
 
-            static FormatterXml withMap(Map<String, String> m) {
-                FormatterXml instance = new FormatterXml();
-                String prettyV = m.getOrDefault("pretty", "true");
-                instance.pretty = convToBoolean.apply(prettyV);
-                String rootTagV = m.getOrDefault("rootTag", "root");
-                instance.rootTag = rootTagV;
+            public static FormatterXml withMap(Map<String, String> m) {
+                FormatterXml instance = new FormatterXml() {
+                    {
+                        pretty = convToBoolean.apply(m.getOrDefault("pretty", "true"));
+                        rootTag = m.getOrDefault("rootTag", "root");
+                    }
+                };
                 return instance;
             }
         }
