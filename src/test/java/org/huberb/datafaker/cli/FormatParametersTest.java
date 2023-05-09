@@ -34,7 +34,7 @@ public class FormatParametersTest {
 
     @Test
     public void testFormatterCsv() {
-        FormatterCsv formatterCsv = new FormatterCsv();
+
         Map<String, String> m = new HashMap<String, String>() {
             {
                 put("header", "false");
@@ -43,7 +43,7 @@ public class FormatParametersTest {
             }
         };
 
-        formatterCsv.parameter(m);
+        FormatterCsv formatterCsv = FormatterCsv.withMap(m);
         assertAll(
                 () -> assertEquals(false, formatterCsv.header),
                 () -> assertEquals('\'', formatterCsv.quote),
@@ -53,7 +53,7 @@ public class FormatParametersTest {
 
     @Test
     public void testFormatterTsv() {
-        FormatterTsv formatterTsv = new FormatterTsv();
+
         Map<String, String> m = new HashMap<String, String>() {
             {
                 put("header", "false");
@@ -62,7 +62,7 @@ public class FormatParametersTest {
             }
         };
 
-        formatterTsv.parameter(m);
+        FormatterTsv formatterTsv = FormatterTsv.withMap(m);
         assertAll(
                 () -> assertEquals(false, formatterTsv.header),
                 () -> assertEquals('\'', formatterTsv.quote),
@@ -72,7 +72,7 @@ public class FormatParametersTest {
 
     @Test
     public void testFormatterSql() {
-        FormatterSql formatterSql = new FormatterSql();
+
         Map<String, String> m = new HashMap<String, String>() {
             {
                 put("batch", "10");
@@ -81,7 +81,7 @@ public class FormatParametersTest {
             }
         };
 
-        formatterSql.parameter(m);
+        FormatterSql formatterSql = FormatterSql.withMap(m);
         assertAll(
                 () -> assertEquals(10, formatterSql.batch),
                 () -> assertEquals(SqlDialect.ANSI, formatterSql.sqlDialect),
@@ -91,7 +91,6 @@ public class FormatParametersTest {
 
     @Test
     public void testFormatterXml() {
-        FormatterXml formatterXml = new FormatterXml();
         Map<String, String> m = new HashMap<String, String>() {
             {
                 put("pretty", "false");
@@ -99,7 +98,7 @@ public class FormatParametersTest {
             }
         };
 
-        formatterXml.parameter(m);
+        FormatterXml formatterXml = FormatterXml.withMap(m);
         assertAll(
                 () -> assertEquals(false, formatterXml.pretty),
                 () -> assertEquals("some-root-tag", formatterXml.rootTag)
