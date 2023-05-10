@@ -156,7 +156,7 @@ public class ParameterParser {
 
         String parseParametername() {
             StringBuilder sb = new StringBuilder();
-            for (String underTest = nextChar(); !underTest.isBlank(); underTest = nextChar()) {
+            for (String underTest = nextChar(); !underTest.isEmpty(); underTest = nextChar()) {
                 if (eqCharsPattern.contains(underTest)) {
                     break;
                 }
@@ -167,14 +167,13 @@ public class ParameterParser {
 
         String parseParametervalue() {
             StringBuilder sb = new StringBuilder();
-
-            for (String underTest = nextChar(); !underTest.isBlank(); underTest = nextChar()) {
+            for (String underTest = nextChar(); !underTest.isEmpty(); underTest = nextChar()) {
                 if (sepCharPattern.contains(underTest)) {
                     break;
                 }
                 if (escChar.equals(underTest)) {
                     String escChar = nextChar();
-                    if (!escChar.isBlank()) {
+                    if (!escChar.isEmpty()) {
                         sb.append(escChar);
                     }
                 } else {

@@ -118,6 +118,14 @@ public class ParameterParserTest {
             assertEquals("A\"1", parameter.value);
 
         }
+        {
+            CharLexingCtx charLexingCtx = new CharLexingCtx("a=A 1");
+            Parameter parameter = instance.parse(charLexingCtx);
+            assertNotNull(parameter);
+            assertEquals("a", parameter.name);
+            assertEquals("A 1", parameter.value);
+
+        }
     }
 
     /**
