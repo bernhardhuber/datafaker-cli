@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Parses parameters.
@@ -142,11 +143,7 @@ public class ParameterParser {
 
         public CharLexingCtx(String s) {
             this.s = s;
-            if (this.s != null) {
-                this.sLength = this.s.length();
-            } else {
-                this.sLength = 0;
-            }
+            this.sLength = Optional.ofNullable(s).map(t -> t.length()).orElse(0);
             this.offset = 0;
         }
 
