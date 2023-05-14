@@ -67,11 +67,11 @@ public class DataFormatProcessorTest {
     @Test
     public void testExtractFieldname() {
         instance = new DataFormatProcessor(faker);
-        assertEquals("fieldname", instance.extractFieldname("fieldname:#{Name.fullName"));
-        assertEquals("fieldname", instance.extractFieldname("#{fieldname}"));
-        assertEquals("field_name", instance.extractFieldname("#{field.name}"));
-        assertEquals("field_name", instance.extractFieldname("#{field name}"));
-        assertEquals("field_name", instance.extractFieldname("#{field 'name'}"));
+        assertEquals("fieldname", instance.extractFieldnameExpression("fieldname:#{Name.fullName")[0]);
+        assertEquals("fieldname", instance.extractFieldnameExpression("#{fieldname}")[0]);
+        assertEquals("field_name", instance.extractFieldnameExpression("#{field.name}")[0]);
+        assertEquals("field_name", instance.extractFieldnameExpression("#{field name}")[0]);
+        assertEquals("field_name", instance.extractFieldnameExpression("#{field 'name'}")[0]);
     }
 
     @ParameterizedTest
@@ -81,7 +81,8 @@ public class DataFormatProcessorTest {
         "examplify_te_st, #{examplify 'te##st'}",})
     public void testExtractFieldnameCsvValues(String expectedValue, String value) {
         instance = new DataFormatProcessor(faker);
-        assertEquals(expectedValue, instance.extractFieldname(value));
+        String[] fieldnameExpression = instance.extractFieldnameExpression(value);
+        assertEquals(expectedValue, fieldnameExpression[0]);
     }
 
     /**

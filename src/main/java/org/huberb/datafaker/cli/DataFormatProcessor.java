@@ -110,14 +110,14 @@ public class DataFormatProcessor {
      */
     public DataFormatProcessor addExpressionsFromStringList(List<String> expressions) {
         for (String expression : expressions) {
-            Supplier<String> supp = () -> faker.expression(expression);
-            String fieldname = extractFieldname(expression);
-            expressionInternalList.add(new ExpressionInternal(fieldname, supp));
+            String[] fieldnameExpression = extractFieldnameExpression(expression);
+            Supplier<String> supp = () -> faker.expression(fieldnameExpression[1]);
+            expressionInternalList.add(new ExpressionInternal(fieldnameExpression[0], supp));
         }
         return this;
     }
 
-    String extractFieldname(String expression) {
+    String[] extractFieldnameExpression(String expression) {
         /* supported formats:
             1. fieldname:#{expression....
             2. expression -> fieldname label
@@ -127,6 +127,7 @@ public class DataFormatProcessor {
         if (fieldnameEndIndex >= 1) {
             fieldname = expression.substring(0, fieldnameEndIndex);
             expression = expression.substring(fieldnameEndIndex + 1);
+            return new String[]{fieldname, expression};
         } else {
             String mangelingString = "_";
             // replace #{, } -> '-'
@@ -138,10 +139,9 @@ public class DataFormatProcessor {
                     .replaceAll("\\W", mangelingString)
                     .replaceAll(mangelingString + "{2,}", mangelingString)
                     .replaceAll("^" + mangelingString, "")
-                    .replaceAll(mangelingString + "$", "")
-                    ;
+                    .replaceAll(mangelingString + "$", "");
         }
-        return fieldname;
+        return new String[]{fieldname, expression};
     }
 
     /**
