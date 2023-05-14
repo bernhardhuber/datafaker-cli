@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2023 berni3.
  *
@@ -57,17 +58,6 @@ public class DataFormatProcessor {
     private final List<ExpressionInternal> expressionInternalList;
     private final int limit;
 
-    Function<String, String> extractFieldname = (s) -> {
-        String result = s;
-        int lastIndexOfDot = s.lastIndexOf('.');
-        if (lastIndexOfDot > 0 && lastIndexOfDot < s.length()) {
-            result = s.substring(lastIndexOfDot + 1);
-        }
-        result = result.replace('{', ' ')
-                .replace('}', ' ').trim();
-        return result;
-    };
-
     /**
      * Create new instance.
      * <p>
@@ -120,11 +110,38 @@ public class DataFormatProcessor {
      */
     public DataFormatProcessor addExpressionsFromStringList(List<String> expressions) {
         for (String expression : expressions) {
-            String fieldname = extractFieldname.apply(expression);
             Supplier<String> supp = () -> faker.expression(expression);
+            String fieldname = extractFieldname(expression);
             expressionInternalList.add(new ExpressionInternal(fieldname, supp));
         }
         return this;
+    }
+
+    String extractFieldname(String expression) {
+        /* supported formats:
+            1. fieldname:#{expression....
+            2. expression -> fieldname label
+         */
+        final String fieldname;
+        final int fieldnameEndIndex = expression.indexOf(":#{");
+        if (fieldnameEndIndex >= 1) {
+            fieldname = expression.substring(0, fieldnameEndIndex);
+            expression = expression.substring(fieldnameEndIndex + 1);
+        } else {
+            String mangelingString = "_";
+            // replace #{, } -> '-'
+            // replace non-alphannum -> '-'
+            // replace double '--' -> '-'
+            fieldname = expression.trim()
+                    //.replace("#{", mangelingString)
+                    //.replace("}", mangelingString)
+                    .replaceAll("\\W", mangelingString)
+                    .replaceAll(mangelingString + "{2,}", mangelingString)
+                    .replaceAll("^" + mangelingString, "")
+                    .replaceAll(mangelingString + "$", "")
+                    ;
+        }
+        return fieldname;
     }
 
     /**
