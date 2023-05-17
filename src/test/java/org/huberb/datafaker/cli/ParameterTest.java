@@ -68,4 +68,15 @@ public class ParameterTest {
         assertEquals(instance1_1.hashCode(), instance1_2.hashCode());
         assertNotEquals(instance1_1.hashCode(), instance2_1.hashCode());
     }
+
+    @Test
+    public void testToString() {
+        Parameter instance1_1 = new Parameter("name1", "value1");
+        Parameter instance1_2 = new Parameter("name1", "value1");
+        Parameter instance2_1 = new Parameter("name2", "value2");
+
+        assertEquals(instance1_1.toString(), instance1_1.toString());
+        assertEquals(instance1_1.toString(), instance1_2.toString());
+        assertNotEquals(instance1_1.toString(), instance2_1.toString());
+    }
 }

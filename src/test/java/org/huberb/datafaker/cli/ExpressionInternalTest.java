@@ -68,4 +68,16 @@ public class ExpressionInternalTest {
         assertEquals(instance1_1.hashCode(), instance1_2.hashCode());
         assertNotEquals(instance1_1.hashCode(), instance2_1.hashCode());
     }
+
+    @Test
+    public void testToString() {
+        ExpressionInternal instance1_1 = new ExpressionInternal("fieldname1", () -> "supplier1");
+        ExpressionInternal instance1_2 = new ExpressionInternal("fieldname1", () -> "supplier1");
+        ExpressionInternal instance2_1 = new ExpressionInternal("fieldname2", () -> "supplier2");
+
+        assertEquals(0, instance1_1.toString().indexOf("ExpressionInternal{fieldname=fieldname1, expression"));
+        assertEquals(0, instance1_2.toString().indexOf("ExpressionInternal{fieldname=fieldname1, expression"));
+        assertEquals(-1, instance2_1.toString().indexOf("ExpressionInternal{fieldname=fieldname1, expression"));
+        assertEquals(0, instance2_1.toString().indexOf("ExpressionInternal{fieldname=fieldname2, expression"));
+    }
 }
