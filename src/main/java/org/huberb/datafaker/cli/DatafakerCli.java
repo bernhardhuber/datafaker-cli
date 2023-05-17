@@ -15,7 +15,10 @@
  */
 package org.huberb.datafaker.cli;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,7 +31,6 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import net.datafaker.Faker;
-import net.datafaker.providers.base.File;
 import org.huberb.datafaker.cli.Adapters.FakerFactory;
 import org.huberb.datafaker.cli.Adapters.Locales;
 import picocli.CommandLine;
@@ -100,10 +102,9 @@ public class DatafakerCli implements Callable<Integer> {
             defaultValue = "",
             description = "Define format parameter")
     private String formatParameters;
-    @Option(names = {"-o", "--output-file"},
-            defaultValue = "",
+    @Option(names = {"-o", "--output-file"},            
             description = "TODO: Write values to a file")
-    private File outpuFile;
+    private File outputFile=null;
 
     @Parameters(index = "0..*", description = "expression arguments.")
     private List<String> expressions;
@@ -160,7 +161,7 @@ public class DatafakerCli implements Callable<Integer> {
         }
     }
 
-    private void handleDataFormat() {
+    private void handleDataFormat() throws IOException {
         // step 0: init
         final Faker faker = createTheFaker();
         UnaryOperator<Integer> normalizeCountOfResults = (i) -> {
@@ -202,7 +203,11 @@ public class DatafakerCli implements Callable<Integer> {
         ParameterParser parameterParser = new ParameterParser();
         Map<String, String> m = parameterParser.parseToMap(formatParameters);
         String result = dataFormatProcessor.format(formatEnum, m);
-        System_out_format("result%n%s%n", result);
+        if (this.outputFile != null) {
+            Files.writeString(this.outputFile.toPath(), result);
+        } else {
+            System_out_format("result%n%s%n", result);
+        }
     }
 
     Faker createTheFaker() {
