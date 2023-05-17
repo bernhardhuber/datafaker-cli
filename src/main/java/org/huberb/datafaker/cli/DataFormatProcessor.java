@@ -316,7 +316,6 @@ public class DataFormatProcessor {
         public int hashCode() {
             int hash = LIMIT_DEFAULT_VALUE;
             hash = 59 * hash + Objects.hashCode(this.fieldname);
-            hash = 59 * hash + Objects.hashCode(this.expressionSupplier);
             return hash;
         }
 
@@ -335,7 +334,7 @@ public class DataFormatProcessor {
             if (!Objects.equals(this.fieldname, other.fieldname)) {
                 return false;
             }
-            return Objects.equals(this.expressionSupplier, other.expressionSupplier);
+            return true;
         }
 
         @Override
@@ -357,6 +356,8 @@ public class DataFormatProcessor {
      */
     static class FormatParameters {
 
+        private FormatParameters() {
+        }
         static Function<String, Boolean> convToBoolean = (s) -> {
             return Boolean.valueOf(s);
         };
