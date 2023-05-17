@@ -44,6 +44,7 @@ public class ParameterTest {
         Parameter instance2_1 = new Parameter("name2", "value2");
 
         //---
+        assertFalse(instance1_1.equals("X"));
         assertFalse(instance1_1.equals(null));
         assertNotEquals(instance1_1, null);
         //---

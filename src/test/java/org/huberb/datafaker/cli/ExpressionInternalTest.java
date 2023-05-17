@@ -44,6 +44,7 @@ public class ExpressionInternalTest {
         ExpressionInternal instance2_1 = new ExpressionInternal("fieldname2", () -> "supplier2");
 
         //---
+        assertFalse(instance1_1.equals("X"));
         assertFalse(instance1_1.equals(null));
         assertNotEquals(instance1_1, null);
         //---
