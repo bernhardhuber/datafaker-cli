@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import net.datafaker.Faker;
+import net.datafaker.providers.base.File;
 import org.huberb.datafaker.cli.Adapters.FakerFactory;
 import org.huberb.datafaker.cli.Adapters.Locales;
 import picocli.CommandLine;
@@ -99,6 +100,10 @@ public class DatafakerCli implements Callable<Integer> {
             defaultValue = "",
             description = "Define format parameter")
     private String formatParameters;
+    @Option(names = {"-o", "--output-file"},
+            defaultValue = "",
+            description = "TODO: Write values to a file")
+    private File outpuFile;
 
     @Parameters(index = "0..*", description = "expression arguments.")
     private List<String> expressions;
