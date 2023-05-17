@@ -29,7 +29,7 @@ import net.datafaker.Faker;
 import org.huberb.datafaker.cli.DataFormatProcessor.ExpressionInternal;
 
 /**
- * Provide some datafaker sample data.
+ * Provide some data faker sample data.
  *
  * @author berni3
  */

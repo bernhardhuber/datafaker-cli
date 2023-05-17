@@ -16,6 +16,7 @@
 package org.huberb.datafaker.cli;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.function.Function;
 import net.datafaker.Faker;
@@ -25,6 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 
 /**
  *
@@ -35,7 +39,7 @@ public class DataFormatProcessorTest {
     static Faker faker;
 
     @BeforeAll
-    static void setUpAll() {
+    public static void setUpAll() {
         faker = Adapters.FakerFactory.createFakerFromLocale(Locale.ENGLISH);
     }
     DataFormatProcessor instance;
@@ -55,9 +59,30 @@ public class DataFormatProcessorTest {
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName}", "#{Address.fullAddress}"));
         assertEquals(2, instance.getCountOfExpressions());
         assertEquals(stripNewLineChars.apply("locale: en\n"
-                + "fieldname fullName\n"
-                + "fieldname fullAddress\n")
+                + "fieldname Name_fullName\n"
+                + "fieldname Address_fullAddress\n")
                 + "", stripNewLineChars.apply(instance.textRepresentation()));
+    }
+
+    @Test
+    public void testExtractFieldname() {
+        instance = new DataFormatProcessor(faker);
+        assertEquals("fieldname", instance.extractFieldnameExpression("fieldname:#{Name.fullName")[0]);
+        assertEquals("fieldname", instance.extractFieldnameExpression("#{fieldname}")[0]);
+        assertEquals("field_name", instance.extractFieldnameExpression("#{field.name}")[0]);
+        assertEquals("field_name", instance.extractFieldnameExpression("#{field name}")[0]);
+        assertEquals("field_name", instance.extractFieldnameExpression("#{field 'name'}")[0]);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "fieldname, fieldname:#{Name.fullName}",
+        "numerify_te_st, #{numerify 'te##st'}",
+        "examplify_te_st, #{examplify 'te##st'}",})
+    public void testExtractFieldnameCsvValues(String expectedValue, String value) {
+        instance = new DataFormatProcessor(faker);
+        String[] fieldnameExpression = instance.extractFieldnameExpression(value);
+        assertEquals(expectedValue, fieldnameExpression[0]);
     }
 
     /**
@@ -85,7 +110,7 @@ public class DataFormatProcessorTest {
     public void testFormatTxt() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result1 = instance.formatTxt();
+        String result1 = instance.formatTxt(Collections.emptyMap());
         assertTrue(!result1.isBlank(), "" + result1);
     }
 
@@ -96,7 +121,7 @@ public class DataFormatProcessorTest {
     public void testFormatCsv() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result2 = instance.formatCsv();
+        String result2 = instance.formatCsv(Collections.emptyMap());
         assertTrue(!result2.isBlank(), "" + result2);
     }
 
@@ -107,7 +132,7 @@ public class DataFormatProcessorTest {
     public void testFormatTsv() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result2 = instance.formatTsv();
+        String result2 = instance.formatTsv(Collections.emptyMap());
         assertTrue(!result2.isBlank(), "" + result2);
     }
 
@@ -118,7 +143,7 @@ public class DataFormatProcessorTest {
     public void testFormatJson() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result3 = instance.formatJson();
+        String result3 = instance.formatJson(Collections.emptyMap());
         assertTrue(!result3.isBlank(), "" + result3);
     }
 
@@ -129,7 +154,7 @@ public class DataFormatProcessorTest {
     public void testFormatSql() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result4 = instance.formatSql();
+        String result4 = instance.formatSql(Collections.emptyMap());
         assertTrue(!result4.isBlank(), "" + result4);
     }
 
@@ -140,7 +165,7 @@ public class DataFormatProcessorTest {
     public void testFormatXml() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result5 = instance.formatXml();
+        String result5 = instance.formatXml(Collections.emptyMap());
         assertTrue(!result5.isBlank(), "" + result5);
     }
 
@@ -151,45 +176,21 @@ public class DataFormatProcessorTest {
     public void testFormatYaml() {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        String result5 = instance.formatYaml();
+        String result5 = instance.formatYaml(Collections.emptyMap());
         assertTrue(!result5.isBlank(), "" + result5);
     }
 
     /**
      * Test of format method, of class DataFormatProcessor.
      */
-    @Test
-    public void testFormat() {
+    @ParameterizedTest
+    @EnumSource()
+    public void testFormatAllFormatEnumValues(FormatEnum formatEnum) {
         instance = new DataFormatProcessor(faker);
         instance.addExpressionsFromStringList(Arrays.asList("#{Name.fullName", "#{Address.fullAddress}"));
-        {
-            String result1 = instance.format(FormatEnum.txt);
-            assertTrue(!result1.isBlank(), "" + result1);
-        }
-        {
-            String result2 = instance.format(FormatEnum.csv);
-            assertTrue(!result2.isBlank(), "" + result2);
-        }
-        {
-            String result2 = instance.format(FormatEnum.tsv);
-            assertTrue(!result2.isBlank(), "" + result2);
-        }
-        {
-            String result3 = instance.format(FormatEnum.json);
-            assertTrue(!result3.isBlank(), "" + result3);
-        }
-        {
-            String result4 = instance.format(FormatEnum.sql);
-            assertTrue(!result4.isBlank(), "" + result4);
-        }
-        {
-            String result5 = instance.format(FormatEnum.xml);
-            assertTrue(!result5.isBlank(), "" + result5);
-        }
-        {
-            String result6 = instance.format(FormatEnum.yaml);
-            assertTrue(!result6.isBlank(), "" + result6);
-        }
+
+        String result1 = instance.format(formatEnum, Collections.emptyMap());
+        assertTrue(!result1.isBlank(), "" + result1);
     }
 
 }

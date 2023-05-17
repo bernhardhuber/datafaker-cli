@@ -15,16 +15,20 @@
  */
 package org.huberb.datafaker.cli;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import net.datafaker.Faker;
 import org.huberb.datafaker.cli.Adapters.FakerFactory;
@@ -48,6 +52,9 @@ import picocli.CommandLine.Spec;
         description = "Run datafaker from the command line%n"
 )
 public class DatafakerCli implements Callable<Integer> {
+
+    private static final int DEFAULT_COUNT_OF_RESULT = 3;
+    private static final int MAX_COUNT_OF_RESULT = 10000;
 
     //-------------------------------------------------------------------------
     /**
@@ -75,8 +82,8 @@ public class DatafakerCli implements Callable<Integer> {
 
     @Option(names = {"-c", "--count"},
             required = false,
-            defaultValue = "3",
-            description = "Count of results.")
+            defaultValue = "" + DEFAULT_COUNT_OF_RESULT,
+            description = "Count of results. Minimum value: 0, Maximum value: " + MAX_COUNT_OF_RESULT + ".")
     private int countOfResults;
 
     @Option(names = {"-e", "--expression"},
@@ -91,6 +98,14 @@ public class DatafakerCli implements Callable<Integer> {
             description = "Valid values: ${COMPLETION-CANDIDATES}.")
     private DataFormatProcessor.FormatEnum formatEnum;
 
+    @Option(names = {"--format-parameter"},
+            defaultValue = "",
+            description = "Define format parameter")
+    private String formatParameters;
+    @Option(names = {"-o", "--output-file"},            
+            description = "TODO: Write values to a file")
+    private File outputFile=null;
+
     @Parameters(index = "0..*", description = "expression arguments.")
     private List<String> expressions;
 
@@ -104,9 +119,6 @@ public class DatafakerCli implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         System_out_format("Hello %s%n", this.getClass().getName());
-        if (countOfResults < 0) {
-            countOfResults = 1;
-        }
 
         if (availableModes != null) {
             handleAvailableModes(availableModes);
@@ -149,28 +161,28 @@ public class DatafakerCli implements Callable<Integer> {
         }
     }
 
-    private void handleDataFormat() {
+    private void handleDataFormat() throws IOException {
         // step 0: init
         final Faker faker = createTheFaker();
-        Function<Integer, Integer> normalizeCountOfResults = (i) -> {
+        UnaryOperator<Integer> normalizeCountOfResults = (i) -> {
             if (i == null || i <= 0) {
-                return 3;
-            } else if (i > 10000) {
-                return 10000;
+                return DEFAULT_COUNT_OF_RESULT;
+            } else if (i > MAX_COUNT_OF_RESULT) {
+                return MAX_COUNT_OF_RESULT;
             }
             return i;
         };
         Predicate<List<String>> isNotEmpty = l -> l != null && !l.isEmpty();
 
-        final DataFormatProcessor dfp = new DataFormatProcessor(faker,
+        final DataFormatProcessor dataFormatProcessor = new DataFormatProcessor(faker,
                 normalizeCountOfResults.apply(this.countOfResults));
 
         // step 1: data
         if (this.dataModes == DataModes.sample) {
             SamplesGenerator samplesGenerator = new SamplesGenerator();
-            dfp.addExpressionsFromExpressionInternalList(samplesGenerator.sampleExpressions(faker));
+            dataFormatProcessor.addExpressionsFromExpressionInternalList(samplesGenerator.sampleExpressions(faker));
         } else if (this.dataModes == DataModes.expression && isNotEmpty.test(expressions)) {
-            dfp.addExpressionsFromStringList(expressions);
+            dataFormatProcessor.addExpressionsFromStringList(expressions);
         } else if (this.dataModes == DataModes.sampleProvider) {
             List<String> providerNames = Collections.emptyList();
             if (isNotEmpty.test(expressions)) {
@@ -178,18 +190,24 @@ public class DatafakerCli implements Callable<Integer> {
                 providerNames.addAll(expressions);
             }
             SamplesGenerator sampleGenerator = new SamplesGenerator();
-            dfp.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList2(faker, providerNames));
+            dataFormatProcessor.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList2(faker, providerNames));
         }
 
-        if (dfp.getCountOfExpressions() == 0) {
-            dfp.addExpressionsFromStringList(Arrays.asList(
+        if (dataFormatProcessor.getCountOfExpressions() == 0) {
+            dataFormatProcessor.addExpressionsFromStringList(Arrays.asList(
                     "#{Name.fullName}",
                     "#{Address.fullAddress}"));
         }
-        System_out_format("expression: %s%n", dfp.textRepresentation());
+        System_out_format("data-format-processor:%n%s%n", dataFormatProcessor.textRepresentation());
         // step 2: format
-        String result = dfp.format(formatEnum);
-        System_out_format("result%n%s%n", result);
+        ParameterParser parameterParser = new ParameterParser();
+        Map<String, String> m = parameterParser.parseToMap(formatParameters);
+        String result = dataFormatProcessor.format(formatEnum, m);
+        if (this.outputFile != null) {
+            Files.writeString(this.outputFile.toPath(), result);
+        } else {
+            System_out_format("result%n%s%n", result);
+        }
     }
 
     Faker createTheFaker() {
