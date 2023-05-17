@@ -8,6 +8,8 @@ Provide a commandline interface for datafaker.
 * show datafaker's provider, and its methods
 * evaluate some datafaker's expression
 * format evaluation using txt, csv, tsv, json, sql, xml, or yaml
+* define format parameters for csv, tsv, etc
+* write evaluated data to an output file
 * define which locale to use
 * define count of sample evaluations
 
