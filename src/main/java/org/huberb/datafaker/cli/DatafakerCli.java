@@ -33,6 +33,10 @@ import java.util.stream.Collectors;
 import net.datafaker.Faker;
 import org.huberb.datafaker.cli.Adapters.FakerFactory;
 import org.huberb.datafaker.cli.Adapters.Locales;
+import org.huberb.datafaker.cli.DataFormatProcessor.FormatParameters.FormatterCsv;
+import org.huberb.datafaker.cli.DataFormatProcessor.FormatParameters.FormatterSql;
+import org.huberb.datafaker.cli.DataFormatProcessor.FormatParameters.FormatterTsv;
+import org.huberb.datafaker.cli.DataFormatProcessor.FormatParameters.FormatterXml;
 import picocli.CommandLine;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -73,11 +77,11 @@ public class DatafakerCli implements Callable<Integer> {
     @Option(names = {"-l", "--locale"},
             required = false,
             description = "language-tag in format {language}[-{country}]."
-            + "eg. en, de, de-AT; see also --available==locales output")
+            + "eg. en, de, de-AT; see also --available==locales output.")
     private String languageTag;
 
     @Option(names = {"-a", "--available"},
-            description = "Valid values: ${COMPLETION-CANDIDATES}")
+            description = "Valid values: ${COMPLETION-CANDIDATES}.")
     private AvailableModes availableModes;
 
     @Option(names = {"-c", "--count"},
@@ -100,13 +104,22 @@ public class DatafakerCli implements Callable<Integer> {
 
     @Option(names = {"--format-parameter"},
             defaultValue = "",
-            description = "Define format parameter")
+            description = "Define format parameters.%n"
+            + FormatterCsv.description
+            + "%n"
+            + FormatterTsv.description
+            + "%n"
+            + FormatterSql.description
+            + "%n"
+            + FormatterXml.description)
     private String formatParameters;
-    @Option(names = {"-o", "--output-file"},            
-            description = "TODO: Write values to a file")
-    private File outputFile=null;
 
-    @Parameters(index = "0..*", description = "expression arguments.")
+    @Option(names = {"-o", "--output-file"},
+            description = "Write evaluated expressions to file.")
+    private File outputFile = null;
+
+    @Parameters(index = "0..*",
+            description = "expression arguments.")
     private List<String> expressions;
 
     //-------------------------------------------------------------------------
@@ -191,9 +204,7 @@ public class DatafakerCli implements Callable<Integer> {
             }
             SamplesGenerator sampleGenerator = new SamplesGenerator();
             dataFormatProcessor.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList2(faker, providerNames));
-        }
-
-        if (dataFormatProcessor.getCountOfExpressions() == 0) {
+        } else {
             dataFormatProcessor.addExpressionsFromStringList(Arrays.asList(
                     "#{Name.fullName}",
                     "#{Address.fullAddress}"));

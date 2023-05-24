@@ -374,6 +374,11 @@ public class DataFormatProcessor {
             String separator = ",";
             char quote = '"';
 
+            public static final String description = "Csv format parameters:%n"
+                    + " header=true|false, default: true%n"
+                    + " separator=chars, default: comma-char%n"
+                    + " quote=char, default: double-quote";
+
             public static FormatterCsv withMap(Map<String, String> m) {
                 FormatterCsv instance = new FormatterCsv() {
                     {
@@ -394,6 +399,11 @@ public class DataFormatProcessor {
             boolean header = true;
             String separator = "\t";
             char quote = '"';
+
+            public static final String description = "Tsv format parameters:%n"
+                    + " header=true|false, default: true%n"
+                    + " separator=chars, default: tabulator-char%n"
+                    + " quote=char, default: double-quote";
 
             public static FormatterTsv withMap(Map<String, String> m) {
                 FormatterTsv instance = new FormatterTsv() {
@@ -416,12 +426,40 @@ public class DataFormatProcessor {
             String tableName = "DATAFAKER_TABLE";
             SqlDialect sqlDialect = SqlDialect.H2;
 
+            public static final String description = "Sql format parameters:%n"
+                    + " batch=number, default: 5%n"
+                    + " tableName=chars, default: DATAFAKER_TABLE%n"
+                    + " sqlDialect="
+                    + "ANSI" + " | "
+                    + "BIGQUERY" + " | "
+                    + "CALCITE" + " | "
+                    + "CLICKHOUSE" + " | "
+                    + "EXASOL" + " | "
+                    + "FIREBOLT" + " | "
+                    + "H2" + " | "
+                    + "INFOBRIGHT" + " | "
+                    + "LUCIDDB" + " | "
+                    + "MARIADB" + " | "
+                    + "MSSQL" + " | "
+                    + "MYSQL" + " | "
+                    + "NETEZZA" + " | "
+                    + "ORACLE" + " | "
+                    + "PARACCEL" + " | "
+                    + "PHOENIX" + " | "
+                    + "POSTGRES" + " | "
+                    + "PRESTO" + " | "
+                    + "REDSHIFT" + " | "
+                    + "SNOWFLAKE" + " | "
+                    + "TERADATA" + " | "
+                    + "VERTICA"
+                    + ", default: ANSI";
+
             public static FormatterSql withMap(Map<String, String> m) {
                 FormatterSql instance = new FormatterSql() {
                     {
                         batch = convToInteger.apply(m.getOrDefault("batch", "5"));
                         tableName = m.getOrDefault("tableName", "DATAFAKER_TABLE");
-                        sqlDialect = SqlDialect.valueOf(m.getOrDefault("quote", SqlDialect.ANSI.toString()));
+                        sqlDialect = SqlDialect.valueOf(m.getOrDefault("sqlDialect", SqlDialect.ANSI.toString()));
                     }
                 };
                 return instance;
@@ -435,6 +473,10 @@ public class DataFormatProcessor {
 
             boolean pretty = true;
             String rootTag = "root";
+
+            public static final String description = "Xml format parameters:%n"
+                    + " root=chars, default: root%n"
+                    + " pretty=true|false, default: true";
 
             public static FormatterXml withMap(Map<String, String> m) {
                 FormatterXml instance = new FormatterXml() {
