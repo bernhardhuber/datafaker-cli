@@ -35,56 +35,48 @@ import picocli.CommandLine.Model.CommandSpec;
  * @author berni3
  */
 public class HistoryGenerator {
-   private static final Logger LOGGER = LoggerFactory.getLogger(HistoryGenerator.class);
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(HistoryGenerator.class);
     private final File historyDir = new File(System.getProperty("user.dir"));
     private final File historyFile = new File(historyDir, ".datfaker-cli-history");
     private final CommandSpec spec;
     private final LoggingSystem loggingSystem;
- 
-
+    private final Set<String> ignoreArgs = new HashSet(Arrays.asList("-V", "--version", "-h", "--help", "--generate-history"));
+    
     public HistoryGenerator(CommandSpec spec) {
         this.spec = spec;
         loggingSystem = new LoggingSystem(spec);
     }
-
+    
     public void writeHistoryFile() {
         try {
             writeAtFile(argsWithoutGenerateAtFileOption());
         } catch (IOException ex) {
             LOGGER.warn(String.format("Cannot write history file %s%n", historyFile.getAbsolutePath()), ex);
-            loggingSystem.System_out_format("Cannot write history file %s%n"
-                    + "Caused by %s",
-                    historyFile.getAbsolutePath(),
-                    ex.getMessage()
-            );
         }
     }
-
+    
     private List<String> argsWithoutGenerateAtFileOption() {
-        List<String> args = spec.commandLine().getParseResult().originalArgs();
-        List<String> result = new ArrayList<>();
-        for (int i = 0; i < args.size(); i++) {
-            String arg = args.get(i);
-            Set<String> ignoreArgs = new HashSet(Arrays.asList("-V", "--version", "-h", "--help"));
-            if (ignoreArgs.contains(arg)) {
-                continue;
-            }
-            result.add(arg);
-        }
+        final List<String> result = new ArrayList<>();
+        
+        final List<String> args = spec.commandLine().getParseResult().originalArgs();
+        args.stream()
+                .filter(s -> !ignoreArgs.contains(s))
+                .forEach(result::add);
         return result;
     }
-
+    
     private void writeAtFile(List<String> args) throws IOException {
-        try (FileWriter fw = new FileWriter(historyFile, true)) {
-            try (PrintWriter pw = new PrintWriter(fw)) {
-                pw.printf("# @%s argument file generated for %s on %s%n", historyFile, spec.qualifiedName(), new Date());
-                for (String arg : args) {
-                    pw.println(quoteAndEscapeBackslashes(arg));
-                }
+        try (PrintWriter pw = new PrintWriter(new FileWriter(historyFile, true))) {
+            pw.printf("%n# generated for %s on %s%n", spec.qualifiedName(), new Date());
+            StringBuilder sb = new StringBuilder();
+            for (String arg : args) {
+                sb.append(quoteAndEscapeBackslashes(arg)).append(' ');
             }
+            pw.println(sb.toString());
         }
     }
-
+    
     private String quoteAndEscapeBackslashes(String original) {
         String result = original;
         boolean needsQuotes = result.startsWith("#");
@@ -106,5 +98,5 @@ public class HistoryGenerator {
         }
         return result;
     }
-
+    
 }
