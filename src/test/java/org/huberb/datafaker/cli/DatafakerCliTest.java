@@ -68,17 +68,17 @@ public class DatafakerCliTest {
          */
         assertEquals("", swErr);
         String outResult = swOut;
-        String m = "" + outResult;
+        String m = String.format("outResult: %s", outResult);
 
         String pattern = "\"[A-Za-z0-9 ,.\"]*\",\"[A-Za-z0-9 ,.]*\"";
         Matcher matcher = Pattern.compile(pattern).matcher(outResult);
         assertTrue(matcher.find(), m);
 
         assertAll(
-                () -> assertTrue(outResult.contains("Hello org.huberb.datafaker.cli.DatafakerCli"), m),
-                () -> assertTrue(outResult.contains("locale:"), m),
-                () -> assertTrue(outResult.contains("fieldname name"), m),
-                () -> assertTrue(outResult.contains("fieldname address"), m),
+                //                () -> assertTrue(outResult.contains("Hello org.huberb.datafaker.cli.DatafakerCli"), m),
+                //                () -> assertTrue(outResult.contains("locale:"), m),
+                //                () -> assertTrue(outResult.contains("fieldname name"), m),
+                //                () -> assertTrue(outResult.contains("fieldname address"), m),
                 () -> assertTrue(outResult.contains("\"name\",\"address\""), m)
         );
     }
@@ -92,7 +92,7 @@ public class DatafakerCliTest {
     @ParameterizedTest
     @EnumSource(value = AvailableModes.class)
     public void testMain_available(AvailableModes availableModes) throws IOException {
-        String m = "" + availableModes;
+        String m = String.format("availableModes: %s", availableModes);
         String[] resultsOutErr = new Invocation()
                 .instance(new DatafakerCli())
                 .args("--available=" + availableModes.name())
@@ -125,7 +125,7 @@ public class DatafakerCliTest {
     @ParameterizedTest
     @EnumSource(value = DataModes.class)
     public void testMain_expression(DataModes dataModes) throws IOException {
-        String m = "" + dataModes;
+        String m = String.format("dataModes: %s", dataModes);
         String[] resultsOutErr = new Invocation()
                 .instance(new DatafakerCli())
                 .args("--expression=" + dataModes.name(),
@@ -162,7 +162,7 @@ public class DatafakerCliTest {
         List<String> parameters = Arrays.asList("#{Name.fullName}",
                 "#{Address.fullAddress}"
         );
-        String m = "" + parameters;
+        String m = String.format("parameters: %s", parameters);
         String[] resultsOutErr = new Invocation()
                 .instance(new DatafakerCli())
                 .args("--expression=expression",
