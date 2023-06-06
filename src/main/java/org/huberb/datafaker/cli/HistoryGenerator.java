@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.huberb.datafaker.cli.DatafakerCli.LoggingSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine.Model.CommandSpec;
@@ -40,12 +39,10 @@ public class HistoryGenerator {
     private final File historyDir = new File(System.getProperty("user.dir"));
     private final File historyFile = new File(historyDir, ".datfaker-cli-history");
     private final CommandSpec spec;
-    private final LoggingSystem loggingSystem;
-    private final Set<String> ignoreArgs = new HashSet(Arrays.asList("-V", "--version", "-h", "--help", "--generate-history"));
+    private final Set<String> ignoreArgs = new HashSet<>(Arrays.asList("-V", "--version", "-h", "--help", "--generate-history"));
     
     public HistoryGenerator(CommandSpec spec) {
         this.spec = spec;
-        loggingSystem = new LoggingSystem(spec);
     }
     
     public void writeHistoryFile() {

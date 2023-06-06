@@ -218,10 +218,7 @@ public class DataFormatProcessor {
                 .separator(formatterCsv.separator)
                 .quote(formatterCsv.quote)
                 .build();
-
-        String result = transformer.generate(schema, limit);
-        return result;
-
+        return transformer.generate(schema, limit);
     }
 
     protected String formatTsv(Map<String, String> m) {
@@ -236,8 +233,7 @@ public class DataFormatProcessor {
                 .quote(formatterTsv.quote)
                 .build();
 
-        String result = transformer.generate(schema, limit);
-        return result;
+        return transformer.generate(schema, limit);
     }
 
     protected String formatJson(Map<String, String> m) {
@@ -248,8 +244,7 @@ public class DataFormatProcessor {
         JsonTransformer transformer = JsonTransformer.<String>builder()
                 .formattedAs(FormattedAs.JSON_ARRAY)
                 .build();
-        String result = transformer.generate(schema, limit);
-        return result;
+        return transformer.generate(schema, limit);
     }
 
     protected String formatSql(Map<String, String> m) {
@@ -264,8 +259,7 @@ public class DataFormatProcessor {
                 .dialect(formatterSql.sqlDialect)
                 .build();
 
-        String result = transformer.generate(schema, limit);
-        return result;
+        return transformer.generate(schema, limit);
     }
 
     protected String formatXml(Map<String, String> m) {
