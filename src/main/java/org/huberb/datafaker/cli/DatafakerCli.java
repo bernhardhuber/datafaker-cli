@@ -129,6 +129,7 @@ public class DatafakerCli implements Callable<Integer> {
     @Parameters(index = "0..*",
             description = "expression arguments.")
     private List<String> expressions;
+
     private LoggingSystem loggingSystem;
 
     //-------------------------------------------------------------------------
@@ -191,7 +192,7 @@ public class DatafakerCli implements Callable<Integer> {
     private void handleDataFormat() throws IOException {
         // step 0: init
         final Faker faker = createTheFaker();
-        UnaryOperator<Integer> normalizeCountOfResults = (i) -> {
+        UnaryOperator<Integer> normalizeCountOfResults = i -> {
             if (i == null || i <= 0) {
                 return DEFAULT_COUNT_OF_RESULT;
             } else if (i > MAX_COUNT_OF_RESULT) {
