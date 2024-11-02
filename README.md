@@ -4,8 +4,9 @@ Provide a commandline interface for datafaker.
 
 ## Build Status 
 
-[![Java CI with Maven](https://github.com/bernhardhuber/socketConnector/actions/workflows/maven.yml/badge.svg)](https://github.com/bernhardhuber/socketConnector/actions/workflows/maven.yml)
+[![Java CI with Maven](https://github.com/bernhardhuber/datafaker-cli/actions/workflows/maven.yml/badge.svg)](https://github.com/bernhardhuber/datafaker-cli/actions/workflows/maven.yml)
 
+[![CodeQL](https://github.com/bernhardhuber/datafaker-cli/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/bernhardhuber/datafaker-cli/actions/workflows/codeql-analysis.yml)
 
 # Key features
 
