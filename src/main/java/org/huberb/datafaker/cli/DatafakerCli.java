@@ -33,6 +33,12 @@ import java.util.stream.Collectors;
 import net.datafaker.Faker;
 import org.huberb.datafaker.cli.Adapters.FakerFactory;
 import org.huberb.datafaker.cli.Adapters.Locales;
+import org.huberb.datafaker.cli.DataFormatProcessor.FormatParameters.FormatterCsv;
+import org.huberb.datafaker.cli.DataFormatProcessor.FormatParameters.FormatterSql;
+import org.huberb.datafaker.cli.DataFormatProcessor.FormatParameters.FormatterTsv;
+import org.huberb.datafaker.cli.DataFormatProcessor.FormatParameters.FormatterXml;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -73,11 +79,11 @@ public class DatafakerCli implements Callable<Integer> {
     @Option(names = {"-l", "--locale"},
             required = false,
             description = "language-tag in format {language}[-{country}]."
-            + "eg. en, de, de-AT; see also --available==locales output")
+            + "eg. en, de, de-AT; see also --available==locales output.")
     private String languageTag;
 
     @Option(names = {"-a", "--available"},
-            description = "Valid values: ${COMPLETION-CANDIDATES}")
+            description = "Valid values: ${COMPLETION-CANDIDATES}.")
     private AvailableModes availableModes;
 
     @Option(names = {"-c", "--count"},
@@ -100,14 +106,31 @@ public class DatafakerCli implements Callable<Integer> {
 
     @Option(names = {"--format-parameter"},
             defaultValue = "",
-            description = "Define format parameter")
+            description = "Define format parameters.%n"
+            + FormatterCsv.description
+            + "%n"
+            + FormatterTsv.description
+            + "%n"
+            + FormatterSql.description
+            + "%n"
+            + FormatterXml.description)
     private String formatParameters;
-    @Option(names = {"-o", "--output-file"},            
-            description = "TODO: Write values to a file")
-    private File outputFile=null;
 
-    @Parameters(index = "0..*", description = "expression arguments.")
+    @Option(names = {"--generate-history"},
+            defaultValue = "false",
+            description = "Generate history entries in ./.datfaker-cli-history"
+    )
+    private boolean generateHistory;
+
+    @Option(names = {"-o", "--output-file"},
+            description = "Write evaluated expressions to file.")
+    private File outputFile = null;
+
+    @Parameters(index = "0..*",
+            description = "expression arguments.")
     private List<String> expressions;
+
+    private LoggingSystem loggingSystem;
 
     //-------------------------------------------------------------------------
     /**
@@ -118,41 +141,46 @@ public class DatafakerCli implements Callable<Integer> {
      */
     @Override
     public Integer call() throws Exception {
-        System_out_format("Hello %s%n", this.getClass().getName());
+        loggingSystem = new LoggingSystem(spec);
+        loggingSystem.info("Hello %s", this.getClass().getName());
 
         if (availableModes != null) {
             handleAvailableModes(availableModes);
         } else {
             handleDataFormat();
         }
+        if (generateHistory) {
+            HistoryGenerator history = new HistoryGenerator(spec);
+            history.writeHistoryFile();
+        }
         return 0;
     }
 
     private void handleAvailableModes(AvailableModes availableModes) {
         if (availableModes == AvailableModes.locales) {
-            System_out_format("default locale: %s%n", Locales.defaultLocale().get().toLanguageTag());
+            loggingSystem.System_out_format("default locale: %s%n", Locales.defaultLocale().get().toLanguageTag());
             Locales.availableLocales().get().
                     stream()
                     .sorted((Locale l1, Locale l2) -> {
                         return l1.toLanguageTag().compareTo(l2.toLanguageTag());
                     }).
-                    forEach(l -> System_out_format("locale : %s%n", l.toLanguageTag()));
+                    forEach(l -> loggingSystem.System_out_format("locale : %s%n", l.toLanguageTag()));
         } else if (availableModes == AvailableModes.providers) {
             new ProvidersQueries()
                     .findAllClassesExtendingAbstractProvider()
-                    .forEach(clazz -> System_out_format("%s : %s%n", clazz.getName(), clazz.getSimpleName()));
+                    .forEach(clazz -> loggingSystem.System_out_format("%s : %s%n", clazz.getName(), clazz.getSimpleName()));
         } else if (availableModes == AvailableModes.providerMethods1) {
             new ProvidersQueries()
                     .findAllMethodsClassesExtendingAbstractProvider()
-                    .forEach(method -> System_out_format("%s%n", method));
+                    .forEach(method -> loggingSystem.System_out_format("%s%n", method));
         } else if (availableModes == AvailableModes.providerMethods2) {
             new ProvidersQueries()
                     .findAllMethodsClassesExtendingAbstractProvider()
                     .stream()
                     .collect(Collectors.groupingBy(m -> m.getDeclaringClass().getName()))
                     .forEach((String k, List<Method> v) -> {
-                        System_out_format("%nClass: %s%n", k);
-                        v.forEach(method -> System_out_format("%s.%s, #args %d%n",
+                        loggingSystem.System_out_format("%nClass: %s%n", k);
+                        v.forEach(method -> loggingSystem.System_out_format("%s.%s, #args %d%n",
                                 method.getDeclaringClass().getSimpleName(),
                                 method,
                                 method.getParameterCount()
@@ -164,7 +192,7 @@ public class DatafakerCli implements Callable<Integer> {
     private void handleDataFormat() throws IOException {
         // step 0: init
         final Faker faker = createTheFaker();
-        UnaryOperator<Integer> normalizeCountOfResults = (i) -> {
+        UnaryOperator<Integer> normalizeCountOfResults = i -> {
             if (i == null || i <= 0) {
                 return DEFAULT_COUNT_OF_RESULT;
             } else if (i > MAX_COUNT_OF_RESULT) {
@@ -191,14 +219,12 @@ public class DatafakerCli implements Callable<Integer> {
             }
             SamplesGenerator sampleGenerator = new SamplesGenerator();
             dataFormatProcessor.addExpressionsFromExpressionInternalList(sampleGenerator.sampleProviderAsExpressionInternalList2(faker, providerNames));
-        }
-
-        if (dataFormatProcessor.getCountOfExpressions() == 0) {
+        } else {
             dataFormatProcessor.addExpressionsFromStringList(Arrays.asList(
                     "#{Name.fullName}",
                     "#{Address.fullAddress}"));
         }
-        System_out_format("data-format-processor:%n%s%n", dataFormatProcessor.textRepresentation());
+        loggingSystem.info("data-format-processor:%n%s", dataFormatProcessor.textRepresentation());
         // step 2: format
         ParameterParser parameterParser = new ParameterParser();
         Map<String, String> m = parameterParser.parseToMap(formatParameters);
@@ -206,7 +232,7 @@ public class DatafakerCli implements Callable<Integer> {
         if (this.outputFile != null) {
             Files.writeString(this.outputFile.toPath(), result);
         } else {
-            System_out_format("result%n%s%n", result);
+            loggingSystem.System_out_format("%s%n", result);
         }
     }
 
@@ -216,9 +242,22 @@ public class DatafakerCli implements Callable<Integer> {
         return FakerFactory.createFakerFromLocale(theLanguageTag);
     }
 
-    private void System_out_format(String format, Object... args) {
-        //System.out.format(format, args);
-        spec.commandLine().getOut().format(format, args);
+    static class LoggingSystem {
+
+        private static final Logger LOGGER = LoggerFactory.getLogger(LoggingSystem.class);
+        private final CommandSpec spec;
+
+        public LoggingSystem(CommandSpec spec) {
+            this.spec = spec;
+        }
+
+        public void System_out_format(String format, Object... args) {
+            spec.commandLine().getOut().format(format, args);
+        }
+
+        public void info(String format, Object... args) {
+            LOGGER.info(String.format(format, args));
+        }
     }
 
     enum AvailableModes {

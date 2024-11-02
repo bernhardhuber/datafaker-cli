@@ -169,9 +169,9 @@ public class ParameterParser {
                     break;
                 }
                 if (escChar.equals(underTest)) {
-                    String escChar = nextChar();
-                    if (!escChar.isEmpty()) {
-                        sb.append(escChar);
+                    String nextChar = nextChar();
+                    if (!nextChar.isEmpty()) {
+                        sb.append(nextChar);
                     }
                 } else {
                     sb.append(underTest);

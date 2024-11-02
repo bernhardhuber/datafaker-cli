@@ -164,9 +164,7 @@ public class SvnrProvider extends AbstractProvider<BaseProviders> {
     }
 
     private int genLaufendeNummer() {
-        int result = faker.random().nextInt(100, 999);
-        //System.out.format("genLaufendeNummer %d%n", result);
-        return result;
+        return faker.random().nextInt(100, 999);
     }
 
 }
