@@ -2,6 +2,11 @@
 
 Provide a commandline interface for datafaker.
 
+## Build Status 
+
+[![Java CI with Maven](https://github.com/bernhardhuber/socketConnector/actions/workflows/maven.yml/badge.svg)](https://github.com/bernhardhuber/socketConnector/actions/workflows/maven.yml)
+
+
 # Key features
 
 * show locales defined in the JVM
